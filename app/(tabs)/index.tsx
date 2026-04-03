@@ -30,7 +30,14 @@ export default function HomeScreen() {
           </Text>
         </ProgressPoint>
       </Progress>
+      <Text className="font-lexend-extraBold text-2xl uppercase text-white">
+        Add exercises
+      </Text>
+      <Text className="text-white/50 font-lexend-extraLight text-sm">
+        Structure your workout with precision sets and reps.
+      </Text>
       <View style={styles.stepContainer}></View>
+
       <ThemedView style={styles.stepContainer}>
         <Link href="/modal">
           <Link.Trigger></Link.Trigger>
