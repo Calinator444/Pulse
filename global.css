@@ -2,5 +2,16 @@
 @import 'uniwind';
 
 @theme {
+  --font-lexend: 'Lexend-Regular';
+  --font-lexend-bold: 'Lexend-Bold';
+  --font-lexend-extraBold: 'Lexend-ExtraBold';
+  --font-lexend-extraLight: 'Lexend-ExtraLight';
+  --font-lexend-semiBold: 'Lexend-SemiBold';
+  --font-lexend-medium: 'Lexend-Medium';
+  --font-lexend-light: 'Lexend-Light';
+  --font-lexend-thin: 'Lexend-Thin';
   --color-background: #0c0e12;
+  --color-primary: #00affe;
+  --color-primary-foreground: #003652;
+  --color-muted: #23262c;
 }
