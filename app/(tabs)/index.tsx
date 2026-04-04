@@ -1,4 +1,6 @@
 import { ThemedView } from '@/components/themed-view';
+import EditCard from '@/components/ui/card';
+import { ExerciseList, ExerciseListItem } from '@/components/ui/exercise-list';
 import { Progress, ProgressPoint } from '@/components/ui/progress';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -8,12 +10,12 @@ import { StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
   return (
-    <View className="bg-background h-full p-5">
+    <View className="bg-background flex flex-col gap-3 min-h-full p-5">
       <Image
         source={require('../../assets/images/pulse-logo.png')}
         style={{ width: 109, height: 32 }}
       />
-      <Progress className="mt-12">
+      <Progress className="mt-8">
         <ProgressPoint label="details">
           <Text className="text-primary-foreground left-1/2 top-1/2 -translate-x-1/2 absolute -translate-y-1/2">
             <MaterialIcons name="check" size={18} color="black" />
@@ -33,10 +35,20 @@ export default function HomeScreen() {
       <Text className="font-lexend-extraBold text-2xl uppercase text-white">
         Add exercises
       </Text>
-      <Text className="text-white/50 font-lexend-extraLight text-sm">
+      <Text className="text-muted-alt font-lexend-extraLight text-sm">
         Structure your workout with precision sets and reps.
       </Text>
       <View style={styles.stepContainer}></View>
+
+      <EditCard
+        title="Hypertrophy Chest & Triceps"
+        subTitle="Current template"
+      />
+      <ExerciseList>
+        <ExerciseListItem />
+        <ExerciseListItem />
+        <ExerciseListItem />
+      </ExerciseList>
 
       <ThemedView style={styles.stepContainer}>
         <Link href="/modal">
