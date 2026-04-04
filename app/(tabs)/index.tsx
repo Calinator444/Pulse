@@ -6,11 +6,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
   return (
-    <View className="bg-background flex flex-col gap-3 min-h-full p-5">
+    <ScrollView className="bg-background flex flex-col gap-3 min-h-full p-5">
       <Image
         source={require('../../assets/images/pulse-logo.png')}
         style={{ width: 109, height: 32 }}
@@ -76,7 +76,7 @@ export default function HomeScreen() {
           </Link.Menu>
         </Link>
       </ThemedView>
-    </View>
+    </ScrollView>
   );
 }
 
