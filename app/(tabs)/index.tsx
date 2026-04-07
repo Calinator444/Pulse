@@ -1,4 +1,5 @@
 import { ThemedView } from '@/components/themed-view';
+import AddButton from '@/components/ui/add-button';
 import EditCard from '@/components/ui/card';
 import { ExerciseList, ExerciseListItem } from '@/components/ui/exercise-list';
 import { Progress, ProgressPoint } from '@/components/ui/progress';
@@ -53,6 +54,8 @@ export default function HomeScreen() {
             <ExerciseListItem />
             <ExerciseListItem />
           </ExerciseList>
+
+          <AddButton label="add next exercise"></AddButton>
 
           <ThemedView style={styles.stepContainer}>
             <Link href="/modal">
