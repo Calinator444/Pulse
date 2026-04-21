@@ -3,14 +3,66 @@ import AddButton from '@/components/ui/add-button';
 import EditCard from '@/components/ui/card';
 import { ExerciseList, ExerciseListItem } from '@/components/ui/exercise-list';
 import { Progress, ProgressPoint } from '@/components/ui/progress';
+import { supabase } from '@/utils/supabase';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
+  const [todos, setTodos] = useState<any[]>([]);
+  const [newTask, setNewTask] = useState('');
+
+  useEffect(() => {
+    const getTodos = async () => {
+      try {
+        const { data: todos, error } = await supabase.from('todos').select();
+
+        if (error) {
+          console.error('Error fetching todos:', error.message);
+          return;
+        }
+
+        if (todos && todos.length > 0) {
+          setTodos(todos);
+        }
+      } catch (error: any) {
+        console.error('Error fetching todos:', error.message);
+      }
+    };
+
+    getTodos();
+  }, []);
+
+  const addTodo = async () => {
+    if (newTask.trim().length <= 3) return;
+
+    const { data, error } = await supabase
+      .from('todos')
+      .insert({ task: newTask.trim() })
+      .select();
+
+    if (error) {
+      console.error('Error adding todo:', error.message);
+      return;
+    }
+
+    if (data) {
+      setTodos([...todos, ...data]);
+      setNewTask('');
+    }
+  };
+
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1 bg-background ">
@@ -83,6 +135,40 @@ export default function HomeScreen() {
               </Link.Menu>
             </Link>
           </ThemedView>
+
+          <View className="flex-row gap-2">
+            <TextInput
+              value={newTask}
+              onChangeText={setNewTask}
+              placeholder="New todo..."
+              placeholderTextColor="#666"
+              className="flex-1 bg-white/10 rounded-lg px-4 py-3 text-white font-lexend-extraLight"
+            />
+            <Pressable
+              onPress={addTodo}
+              className="bg-white rounded-lg px-4 justify-center">
+              <Text className="text-black font-lexend-extraBold text-sm">
+                Add
+              </Text>
+            </Pressable>
+          </View>
+
+          {todos.length > 0 ? (
+            <View>
+              <Text className="font-lexend-extraBold text-xl uppercase text-white mb-2">
+                Todos
+              </Text>
+              {todos.map((item) => (
+                <Text
+                  key={item.id}
+                  className="text-white font-lexend-extraLight text-sm mb-1">
+                  {item.name}
+                </Text>
+              ))}
+            </View>
+          ) : (
+            <Text className="text-white">No Todos yet</Text>
+          )}
         </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
