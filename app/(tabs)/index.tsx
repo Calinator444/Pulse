@@ -1,8 +1,10 @@
 import { ThemedView } from '@/components/themed-view';
 import AddButton from '@/components/ui/add-button';
 import EditCard from '@/components/ui/card';
+
 import { ExerciseList, ExerciseListItem } from '@/components/ui/exercise-list';
 import { Progress, ProgressPoint } from '@/components/ui/progress';
+import { Tables } from '@/schema.gen';
 import { supabase } from '@/utils/supabase';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -20,14 +22,18 @@ import {
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  const [todos, setTodos] = useState<any[]>([]);
+  const [todos, setTodos] = useState<Tables<'todos'>[]>([]);
   const [newTask, setNewTask] = useState('');
 
+  let todo: Tables<'todos'>;
   useEffect(() => {
     const getTodos = async () => {
       try {
-        const { data: todos, error } = await supabase.from('todos').select();
+        const todosQuery = await supabase.from('todos').select();
 
+        const { data: todos, error } = todosQuery;
+
+        console.log('Fetched todos:', todos);
         if (error) {
           console.error('Error fetching todos:', error.message);
           return;
@@ -36,8 +42,8 @@ export default function HomeScreen() {
         if (todos && todos.length > 0) {
           setTodos(todos);
         }
-      } catch (error: any) {
-        console.error('Error fetching todos:', error.message);
+      } catch (error) {
+        console.error('Error fetching todos:', error);
       }
     };
 
@@ -47,9 +53,13 @@ export default function HomeScreen() {
   const addTodo = async () => {
     if (newTask.trim().length <= 3) return;
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const { data, error } = await supabase
       .from('todos')
-      .insert({ task: newTask.trim() })
+      .insert({ task: newTask.trim(), user_id: user!.id })
       .select();
 
     if (error) {
@@ -162,7 +172,7 @@ export default function HomeScreen() {
                 <Text
                   key={item.id}
                   className="text-white font-lexend-extraLight text-sm mb-1">
-                  {item.name}
+                  {item.task}
                 </Text>
               ))}
             </View>
