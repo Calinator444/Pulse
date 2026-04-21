@@ -82,7 +82,12 @@ export default function HomeScreen() {
           />
           <ExerciseList>
             {sets.map((set, index) => (
-              <ExerciseListItem key={index} index={index} {...set} />
+              <ExerciseListItem
+                key={index}
+                index={index}
+                {...set}
+                onDelete={() => setSets(sets.filter((_, i) => i !== index))}
+              />
             ))}
             <ExerciseListButton
               onPress={() =>
