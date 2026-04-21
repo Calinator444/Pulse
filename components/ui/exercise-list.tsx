@@ -1,8 +1,10 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
-import { Text, View } from 'react-native';
+import { Pressable, PressableProps, Text, View } from 'react-native';
+
 const ExerciseList = ({ children }: { children?: React.ReactNode }) => {
   return (
-    <View className="p-6 rounded-lg bg-neutral overflow-hidden">
+    <View className="p-6 transition-transform rounded-lg bg-neutral overflow-hidden">
       <View className="absolute grayscale mask-top from-transparent t inset-0 mask-b-from-0% h-40 overflow-hidden w-full">
         <Image
           style={{
@@ -35,15 +37,40 @@ const ExerciseList = ({ children }: { children?: React.ReactNode }) => {
   );
 };
 
-const ExerciseListItem = () => {
+const ExerciseListItem = ({
+  index,
+  rpe,
+  reps,
+  weight,
+}: {
+  index: number;
+  rpe: number;
+  reps: number;
+  weight: number;
+  animate?: boolean;
+}) => {
   return (
-    <View className="flex p-3 bg-neutral-foreground rounded-lg *:flex-1 flex-row">
-      <Text className="text-primary font-lexend-bold">01</Text>
-      <Text className="text-white font-lexend-bold">80</Text>
-      <Text className="text-white font-lexend-bold">10</Text>
-      <Text className="text-tertiary font-lexend-bold">RPE 8</Text>
+    <View
+      className={`flex p-3 bg-neutral-foreground rounded-lg *:flex-1 flex-row animate-enter`}>
+      <Text className="text-primary font-lexend-bold">0{index + 1}</Text>
+      <Text className="text-white font-lexend-bold">{weight}</Text>
+      <Text className="text-white font-lexend-bold">{reps}</Text>
+      <Text className="text-tertiary font-lexend-bold">RPE {rpe}</Text>
     </View>
   );
 };
 
-export { ExerciseList, ExerciseListItem };
+const ExerciseListButton = (props: PressableProps) => {
+  return (
+    <Pressable
+      {...props}
+      className="border-2 rounded-md border-neutral-border border-dashed p-4">
+      <Text className="uppercase flex items-center font-lexend-semiBold text-[12px] gap-2 justify-center text-neutral-text">
+        <MaterialCommunityIcons size={20} name="plus" />
+        Add Set
+      </Text>
+    </Pressable>
+  );
+};
+
+export { ExerciseList, ExerciseListButton, ExerciseListItem };

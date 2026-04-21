@@ -2,76 +2,45 @@ import { ThemedView } from '@/components/themed-view';
 import AddButton from '@/components/ui/add-button';
 import EditCard from '@/components/ui/card';
 
-import { ExerciseList, ExerciseListItem } from '@/components/ui/exercise-list';
+import {
+  ExerciseList,
+  ExerciseListButton,
+  ExerciseListItem,
+} from '@/components/ui/exercise-list';
 import { Progress, ProgressPoint } from '@/components/ui/progress';
-import { Tables } from '@/schema.gen';
 import { supabase } from '@/utils/supabase';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import React, { useEffect } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-export default function HomeScreen() {
-  const [todos, setTodos] = useState<Tables<'todos'>[]>([]);
-  const [newTask, setNewTask] = useState('');
+type Set = {
+  rpe: number;
+  reps: number;
+  weight: number;
+};
 
-  let todo: Tables<'todos'>;
+export default function HomeScreen() {
+  // const [todos, setTodos] = useState<Tables<''>[]>([]);
+
+  // const [newTasasync k, setNewTask] = useState('');
+
+  const [sets, setSets] = React.useState<Set[]>([
+    { rpe: 8, reps: 10, weight: 80 },
+    { rpe: 8, reps: 10, weight: 80 },
+    { rpe: 8, reps: 10, weight: 80 },
+  ]);
   useEffect(() => {
     const getTodos = async () => {
-      try {
-        const todosQuery = await supabase.from('todos').select();
-
-        const { data: todos, error } = todosQuery;
-
-        console.log('Fetched todos:', todos);
-        if (error) {
-          console.error('Error fetching todos:', error.message);
-          return;
-        }
-
-        if (todos && todos.length > 0) {
-          setTodos(todos);
-        }
-      } catch (error) {
-        console.error('Error fetching todos:', error);
-      }
+      let result = await supabase.from('workouts').select('id, sets (rpe) ');
+      console.log('Result:', result);
     };
 
     getTodos();
   }, []);
-
-  const addTodo = async () => {
-    if (newTask.trim().length <= 3) return;
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    const { data, error } = await supabase
-      .from('todos')
-      .insert({ task: newTask.trim(), user_id: user!.id })
-      .select();
-
-    if (error) {
-      console.error('Error adding todo:', error.message);
-      return;
-    }
-
-    if (data) {
-      setTodos([...todos, ...data]);
-      setNewTask('');
-    }
-  };
 
   return (
     <SafeAreaProvider>
@@ -112,9 +81,14 @@ export default function HomeScreen() {
             subTitle="Current template"
           />
           <ExerciseList>
-            <ExerciseListItem />
-            <ExerciseListItem />
-            <ExerciseListItem />
+            {sets.map((set, index) => (
+              <ExerciseListItem key={index} index={index} {...set} />
+            ))}
+            <ExerciseListButton
+              onPress={() =>
+                setSets([...sets, { rpe: 8, reps: 10, weight: 80 }])
+              }
+            />
           </ExerciseList>
 
           <AddButton label="add next exercise"></AddButton>
@@ -146,7 +120,7 @@ export default function HomeScreen() {
             </Link>
           </ThemedView>
 
-          <View className="flex-row gap-2">
+          {/* <View className="flex-row gap-2">
             <TextInput
               value={newTask}
               onChangeText={setNewTask}
@@ -161,9 +135,9 @@ export default function HomeScreen() {
                 Add
               </Text>
             </Pressable>
-          </View>
+          </View> */}
 
-          {todos.length > 0 ? (
+          {/* {todos.length > 0 ? (
             <View>
               <Text className="font-lexend-extraBold text-xl uppercase text-white mb-2">
                 Todos
@@ -178,7 +152,7 @@ export default function HomeScreen() {
             </View>
           ) : (
             <Text className="text-white">No Todos yet</Text>
-          )}
+          )} */}
         </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>

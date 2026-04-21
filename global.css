@@ -20,10 +20,24 @@
   --color-neutral: #171a1f;
   --color-neutral-foreground: #1d2025;
   --color-neutral-primary: #f6f6fc;
+  --color-neutral-border: #46484d;
   --color-neutral-text: #74757a;
   --color-muted: #23262c;
   --color-foreground: #111318;
   --color-muted-alt: #aaabb0;
   --color-tertiary: #a68cff;
   --text-xs: 0.625rem;
+
+  --animate-enter: enter 0.3s ease-out;
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
 }

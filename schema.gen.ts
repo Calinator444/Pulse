@@ -34,27 +34,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      todos: {
+      exercises: {
         Row: {
-          id: number
-          inserted_at: string
-          is_complete: boolean | null
-          task: string | null
-          user_id: string
+          id: string
+          name: string | null
         }
         Insert: {
-          id?: number
-          inserted_at?: string
-          is_complete?: boolean | null
-          task?: string | null
-          user_id: string
+          id?: string
+          name?: string | null
         }
         Update: {
-          id?: number
-          inserted_at?: string
-          is_complete?: boolean | null
-          task?: string | null
-          user_id?: string
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
+      sets: {
+        Row: {
+          exercise_id: string
+          id: string
+          order: number | null
+          rpe: number | null
+          workout_id: string | null
+        }
+        Insert: {
+          exercise_id: string
+          id?: string
+          order?: number | null
+          rpe?: number | null
+          workout_id?: string | null
+        }
+        Update: {
+          exercise_id?: string
+          id?: string
+          order?: number | null
+          rpe?: number | null
+          workout_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sets_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sets_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workouts: {
+        Row: {
+          created_at: string
+          finished_at: string | null
+          id: string
+        }
+        Insert: {
+          created_at: string
+          finished_at?: string | null
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          finished_at?: string | null
+          id?: string
         }
         Relationships: []
       }
@@ -66,7 +114,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      exerciseType: "Upper" | "Lower"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -196,7 +244,9 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      exerciseType: ["Upper", "Lower"],
+    },
   },
 } as const
 
