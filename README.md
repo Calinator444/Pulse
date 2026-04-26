@@ -10,6 +10,12 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
+2. Start Supabase
+
+```
+   npx supabase start
+```
+
 2. Start the app
 
    ```bash
@@ -34,6 +40,10 @@ npm run reset-project
 ```
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+
+### Troubleshooting
+
+If Supabase fails to start, run `supabase stop` and then `npx supabase start` again.
 
 ## Learn more
 
