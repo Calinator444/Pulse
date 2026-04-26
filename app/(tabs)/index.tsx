@@ -21,17 +21,14 @@ type Set = {
   rpe: number;
   reps: number;
   weight: number;
+  done: boolean;
 };
 
 export default function HomeScreen() {
-  // const [todos, setTodos] = useState<Tables<''>[]>([]);
-
-  // const [newTasasync k, setNewTask] = useState('');
-
   const [sets, setSets] = React.useState<Set[]>([
-    { rpe: 8, reps: 10, weight: 80 },
-    { rpe: 8, reps: 10, weight: 80 },
-    { rpe: 8, reps: 10, weight: 80 },
+    { rpe: 8, reps: 10, weight: 80, done: false },
+    { rpe: 8, reps: 10, weight: 80, done: false },
+    { rpe: 8, reps: 10, weight: 80, done: false },
   ]);
   useEffect(() => {
     const getTodos = async () => {
@@ -83,15 +80,30 @@ export default function HomeScreen() {
           <ExerciseList>
             {sets.map((set, index) => (
               <ExerciseListItem
-                key={index}
                 index={index}
+                key={index}
                 {...set}
+                onCompleteChanged={(val) =>
+                  setSets([
+                    ...sets.slice(0, index),
+                    { ...set, done: val },
+                    ...sets.slice(index + 1),
+                  ])
+                }
                 onDelete={() => setSets(sets.filter((_, i) => i !== index))}
               />
             ))}
             <ExerciseListButton
               onPress={() =>
-                setSets([...sets, { rpe: 8, reps: 10, weight: 80 }])
+                setSets([
+                  ...sets,
+                  {
+                    rpe: 8,
+                    reps: 10,
+                    weight: 80,
+                    done: false,
+                  },
+                ])
               }
             />
           </ExerciseList>
