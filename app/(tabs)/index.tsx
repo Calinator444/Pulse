@@ -6,6 +6,7 @@ import {
   ExerciseList,
   ExerciseListButton,
   ExerciseListItem,
+  ExerciseListNewItem,
 } from '@/components/ui/exercise-list';
 import { Progress, ProgressPoint } from '@/components/ui/progress';
 import { supabase } from '@/utils/supabase';
@@ -26,6 +27,7 @@ type Set = {
 };
 
 export default function HomeScreen() {
+  const [isAdding, setIsAdding] = React.useState(false);
   const [sets, setSets] = React.useState<Set[]>([
     { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
     { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
@@ -94,20 +96,26 @@ export default function HomeScreen() {
                 onDelete={() => setSets(sets.filter((s) => s.key !== key))}
               />
             ))}
-            <ExerciseListButton
-              onPress={() =>
-                setSets([
-                  ...sets,
-                  {
-                    key: crypto.randomUUID(),
-                    rpe: 8,
-                    reps: 10,
-                    weight: 80,
-                    done: false,
-                  },
-                ])
-              }
-            />
+            {isAdding && (
+              <ExerciseListNewItem
+                index={sets.length}
+                onSave={({ weight, reps, rpe }) => {
+                  setSets([
+                    ...sets,
+                    {
+                      key: crypto.randomUUID(),
+                      rpe,
+                      reps,
+                      weight,
+                      done: false,
+                    },
+                  ]);
+                  setIsAdding(false);
+                }}
+                onCancel={() => setIsAdding(false)}
+              />
+            )}
+            <ExerciseListButton onPress={() => setIsAdding(true)} />
           </ExerciseList>
 
           <AddButton label="add next exercise"></AddButton>

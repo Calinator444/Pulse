@@ -1,10 +1,11 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import React, { useLayoutEffect, useState } from 'react';
 import { useResolveClassNames } from 'uniwind';
 
 import { cn } from '@/lib/utils';
 import { Image } from 'expo-image';
-import { Pressable, PressableProps, Text, View } from 'react-native';
+import { Pressable, PressableProps, Text, TextInput, View } from 'react-native';
 import {
   GestureHandlerRootView,
   Swipeable,
@@ -36,13 +37,10 @@ const ExerciseList = ({ children }: { children?: React.ReactNode }) => {
           </Text>
         </View>
         <View className="flex flex-row *:uppercase *:font-lexend-bold p-3 *:text-neutral-text *:text-xs">
-          <Text className="flex-1">set</Text>
-          <Text className="flex-2">weight</Text>
-          <Text className="flex-2">reps</Text>
-          <Text className="flex-2">Target</Text>
-
-          {/* I may not need this? */}
-          <View className="flex-1" />
+          <Text className="flex-1/5">set</Text>
+          <Text className="flex-1/5">weight</Text>
+          <Text className="flex-1/5">reps</Text>
+          <Text className="flex-2/5">Target</Text>
         </View>
         <View className="gap-4">{children}</View>
       </View>
@@ -77,7 +75,22 @@ const ExerciseListItem = ({
   onCompleteChanged?: (value: boolean) => void;
   onDelete?: () => void;
 }) => {
-  const checkboxStyles = useResolveClassNames('flex bg-neutral-foreground');
+  const finalTextBoxRef = React.useRef<Text | null>(null);
+
+  const containerRef = React.useRef<View | null>(null);
+  const [strokeWidth, setStrokeWidth] = useState(0);
+
+  useLayoutEffect(() => {
+    finalTextBoxRef.current?.measureInWindow((tx, ty, tw) => {
+      containerRef.current?.measureInWindow((cx, cy, cw) => {
+        const endOfTextBox = tx + tw;
+        const endOfContainer = cx + cw;
+        const distanceTextBoxContainerEnd = endOfContainer - endOfTextBox;
+        const finalWidth = cw - distanceTextBoxContainerEnd - 4;
+        setStrokeWidth(finalWidth);
+      });
+    });
+  }, []);
   return (
     <Swipeable
       renderRightActions={() => <DeleteAction />}
@@ -88,33 +101,108 @@ const ExerciseListItem = ({
       }}
       overshootRight={false}>
       <View
+        ref={containerRef}
         className={cn(
           `flex p-3 bg-neutral-foreground transition-all rounded-lg flex-row animate-enter`,
           done && '**:text-neutral-border',
         )}>
-        <View className="flex basis-7/8 flex-row">
-          <View
-            className={cn(
-              'absolute h-px origin-left inset-x-0 top-1/2 -translate-y-1/2 z-1 transition-transform bg-neutral-text',
-              done ? 'scale-x-100' : 'scale-x-0',
-            )}
-          />
-          <Text className="text-primary flex-1 font-lexend-bold">
-            0{index + 1}
-          </Text>
-          <Text className="text-white flex-2 font-lexend-bold">{weight}</Text>
-          <Text className="text-white flex-2 font-lexend-bold">{reps}</Text>
-          <Text className="text-tertiary flex-2 font-lexend-bold">
+        <View
+          style={{
+            width: done ? strokeWidth : 0,
+          }}
+          className={cn(
+            'absolute h-px origin-left left-2 top-1/2 -translate-y-1/2 z-1 transition-all bg-neutral-text',
+          )}
+        />
+        <Text className="text-primary flex-1 font-lexend-bold">
+          0{index + 1}
+        </Text>
+        <Text className="text-white flex-1 font-lexend-bold">{weight}</Text>
+        <Text className="text-white flex-1 font-lexend-bold">{reps}</Text>
+        <View className="flex-1 flex items-start">
+          <Text
+            ref={finalTextBoxRef}
+            className="text-tertiary font-lexend-bold">
             RPE {rpe}
           </Text>
         </View>
-        <Checkbox
-          onCheckedChange={(val) => onCompleteChanged?.(val)}
-          className="top-1/2 absolute -translate-y-1/2 right-2"
-          checked={done}
-        />
+        <View className="flex-1 items-end">
+          <Checkbox
+            onCheckedChange={(val) => onCompleteChanged?.(val)}
+            className="grow"
+            checked={done}
+          />
+        </View>
       </View>
     </Swipeable>
+  );
+};
+
+const ExerciseListNewItem = ({
+  index,
+  onSave,
+  onCancel,
+}: {
+  index: number;
+  onSave: (values: { weight: number; reps: number; rpe: number }) => void;
+  onCancel: () => void;
+}) => {
+  const [weight, setWeight] = React.useState('');
+  const [reps, setReps] = React.useState('');
+  const [rpe, setRpe] = React.useState('');
+
+  return (
+    <View className="flex p-3 bg-neutral-foreground rounded-lg flex-row items-center">
+      <View className="flex flex-row items-center">
+        <Text className="text-primary flex-1 font-lexend-bold">
+          0{index + 1}
+        </Text>
+        {/* <View className="flex-1" />
+        <View className="flex-2" />
+        <View className="flex-2" /> */}
+        {/* <View className="flex-2" /> */}
+        {/* <View className="flex-1" /> */}
+        <TextInput
+          className="text-white border border-black w-full overflow-hidden flex-2 font-lexend-bold bg-neutral/50 rounded"
+          placeholderTextColor="#555"
+          keyboardType="numeric"
+          value={weight}
+          onChangeText={setWeight}
+        />
+        <TextInput
+          className="text-white w-full flex-2 font-lexend-bold bg-neutral/50 rounded  ml-1"
+          placeholder="reps"
+          placeholderTextColor="#555"
+          keyboardType="numeric"
+          value={reps}
+          onChangeText={setReps}
+        />
+        <TextInput
+          className="w-full flex-2 font-lexend-bold bg-neutral/50 rounded ml-1"
+          placeholder="rpe"
+          placeholderTextColor="#555"
+          keyboardType="numeric"
+          value={rpe}
+          onChangeText={setRpe}
+        />
+      </View>
+      {/* <View className="flex-row gap-2 ml-2">
+        <Pressable
+          onPress={() => {
+            const w = parseFloat(weight);
+            const r = parseInt(reps, 10);
+            const p = parseFloat(rpe);
+            if (!isNaN(w) && !isNaN(r) && !isNaN(p)) {
+              onSave({ weight: w, reps: r, rpe: p });
+            }
+          }}>
+          <MaterialIcons name="check" size={20} color="#22c55e" />
+        </Pressable>
+        <Pressable onPress={onCancel}>
+          <MaterialIcons name="close" size={20} color="#ef4444" />
+        </Pressable>
+      </View> */}
+    </View>
   );
 };
 
@@ -166,4 +254,10 @@ const Checkbox = ({
   );
 };
 
-export { ExerciseList, ExerciseListButton, ExerciseListItem };
+export {
+  ExerciseList,
+  ExerciseListButton,
+  ExerciseListItem,
+  ExerciseListNewItem
+};
+
