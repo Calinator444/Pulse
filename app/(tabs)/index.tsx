@@ -18,6 +18,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 type Set = {
+  key: string;
   rpe: number;
   reps: number;
   weight: number;
@@ -26,9 +27,9 @@ type Set = {
 
 export default function HomeScreen() {
   const [sets, setSets] = React.useState<Set[]>([
-    { rpe: 8, reps: 10, weight: 80, done: false },
-    { rpe: 8, reps: 10, weight: 80, done: false },
-    { rpe: 8, reps: 10, weight: 80, done: false },
+    { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
+    { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
+    { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
   ]);
   useEffect(() => {
     const getTodos = async () => {
@@ -78,19 +79,19 @@ export default function HomeScreen() {
             subTitle="Current template"
           />
           <ExerciseList>
-            {sets.map((set, index) => (
+            {sets.map(({ key, ...set }, index) => (
               <ExerciseListItem
                 index={index}
-                key={index}
+                key={key}
                 {...set}
                 onCompleteChanged={(val) =>
                   setSets([
                     ...sets.slice(0, index),
-                    { ...set, done: val },
+                    { ...set, done: val, key },
                     ...sets.slice(index + 1),
                   ])
                 }
-                onDelete={() => setSets(sets.filter((_, i) => i !== index))}
+                onDelete={() => setSets(sets.filter((s) => s.key !== key))}
               />
             ))}
             <ExerciseListButton
@@ -98,6 +99,7 @@ export default function HomeScreen() {
                 setSets([
                   ...sets,
                   {
+                    key: crypto.randomUUID(),
                     rpe: 8,
                     reps: 10,
                     weight: 80,
