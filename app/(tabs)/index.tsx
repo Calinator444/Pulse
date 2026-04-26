@@ -27,7 +27,7 @@ type Set = {
 };
 
 export default function HomeScreen() {
-  const [isAdding, setIsAdding] = React.useState(false);
+  const [addingItems, setAddingItems] = React.useState<{ key: string }[]>([]);
   const [sets, setSets] = React.useState<Set[]>([
     { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
     { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
@@ -96,9 +96,11 @@ export default function HomeScreen() {
                 onDelete={() => setSets(sets.filter((s) => s.key !== key))}
               />
             ))}
-            {isAdding && (
+
+            {addingItems.map((item, index) => (
               <ExerciseListNewItem
-                index={sets.length}
+                key={item.key}
+                index={sets.length + index}
                 onSave={({ weight, reps, rpe }) => {
                   setSets([
                     ...sets,
@@ -110,12 +112,16 @@ export default function HomeScreen() {
                       done: false,
                     },
                   ]);
-                  setIsAdding(false);
+                  setAddingItems([]);
                 }}
-                onCancel={() => setIsAdding(false)}
+                onCancel={() => setAddingItems([])}
               />
-            )}
-            <ExerciseListButton onPress={() => setIsAdding(true)} />
+            ))}
+            <ExerciseListButton
+              onPress={() =>
+                setAddingItems([...addingItems, { key: crypto.randomUUID() }])
+              }
+            />
           </ExerciseList>
 
           <AddButton label="add next exercise"></AddButton>

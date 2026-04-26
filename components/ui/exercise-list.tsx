@@ -5,7 +5,14 @@ import { useResolveClassNames } from 'uniwind';
 
 import { cn } from '@/lib/utils';
 import { Image } from 'expo-image';
-import { Pressable, PressableProps, Text, TextInput, View } from 'react-native';
+import {
+  Button,
+  Pressable,
+  PressableProps,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import {
   GestureHandlerRootView,
   Swipeable,
@@ -152,56 +159,38 @@ const ExerciseListNewItem = ({
   const [rpe, setRpe] = React.useState('');
 
   return (
-    <View className="flex p-3 bg-neutral-foreground rounded-lg flex-row items-center">
-      <View className="flex flex-row items-center">
-        <Text className="text-primary flex-1 font-lexend-bold">
-          0{index + 1}
-        </Text>
-        {/* <View className="flex-1" />
-        <View className="flex-2" />
-        <View className="flex-2" /> */}
-        {/* <View className="flex-2" /> */}
-        {/* <View className="flex-1" /> */}
+    <View className="flex flex-1 flex-row p-3 items-center bg-neutral-foreground rounded-lg ">
+      <Text className="text-primary w-full flex-1/5 font-lexend-bold">
+        0{index + 1}
+      </Text>
+
+      <View className="flex-1/5">
         <TextInput
-          className="text-white border border-black w-full overflow-hidden flex-2 font-lexend-bold bg-neutral/50 rounded"
-          placeholderTextColor="#555"
+          className="text-white w-8 border border-neutral-border overflow-hidden flex-1/5 font-lexend-bold bg-neutral rounded"
           keyboardType="numeric"
           value={weight}
           onChangeText={setWeight}
         />
+      </View>
+      <View className="flex-1/5 flex items-start">
         <TextInput
-          className="text-white w-full flex-2 font-lexend-bold bg-neutral/50 rounded  ml-1"
-          placeholder="reps"
-          placeholderTextColor="#555"
+          className="text-white w-8 font-lexend-bold bg-neutral border border-neutral-border rounded"
           keyboardType="numeric"
           value={reps}
           onChangeText={setReps}
         />
+      </View>
+      <View className="flex-1/5 flex items-start">
         <TextInput
-          className="w-full flex-2 font-lexend-bold bg-neutral/50 rounded ml-1"
-          placeholder="rpe"
-          placeholderTextColor="#555"
+          className="w-8 border border-neutral-border font-lexend-bold bg-neutral rounded"
           keyboardType="numeric"
           value={rpe}
           onChangeText={setRpe}
         />
       </View>
-      {/* <View className="flex-row gap-2 ml-2">
-        <Pressable
-          onPress={() => {
-            const w = parseFloat(weight);
-            const r = parseInt(reps, 10);
-            const p = parseFloat(rpe);
-            if (!isNaN(w) && !isNaN(r) && !isNaN(p)) {
-              onSave({ weight: w, reps: r, rpe: p });
-            }
-          }}>
-          <MaterialIcons name="check" size={20} color="#22c55e" />
-        </Pressable>
-        <Pressable onPress={onCancel}>
-          <MaterialIcons name="close" size={20} color="#ef4444" />
-        </Pressable>
-      </View> */}
+      <View className="flex-1/5">
+        <Button title="add" />
+      </View>
     </View>
   );
 };
