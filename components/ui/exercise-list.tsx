@@ -18,7 +18,17 @@ import {
   Swipeable,
 } from 'react-native-gesture-handler';
 
-const ExerciseList = ({ children }: { children?: React.ReactNode }) => {
+const ExerciseList = ({
+  children,
+  itemCount,
+  onAddSet,
+}: {
+  children?: React.ReactNode;
+  itemCount: number;
+  onAddSet: (values: { weight: number; reps: number; rpe: number }) => void;
+}) => {
+  const [addingItems, setAddingItems] = React.useState<{ key: string }[]>([]);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View className="p-6 transition-transform rounded-lg bg-neutral overflow-hidden">
@@ -49,7 +59,27 @@ const ExerciseList = ({ children }: { children?: React.ReactNode }) => {
           <Text className="flex-1/5">reps</Text>
           <Text className="flex-2/5">Target</Text>
         </View>
-        <View className="gap-4">{children}</View>
+        <View className="gap-4">
+          {children}
+          {addingItems.map((item, index) => (
+            <ExerciseListNewItem
+              key={item.key}
+              index={itemCount + index}
+              onSave={(values) => {
+                onAddSet(values);
+                setAddingItems(addingItems.filter((i) => i.key !== item.key));
+              }}
+              onCancel={() =>
+                setAddingItems(addingItems.filter((i) => i.key !== item.key))
+              }
+            />
+          ))}
+          <ExerciseListButton
+            onPress={() =>
+              setAddingItems([...addingItems, { key: crypto.randomUUID() }])
+            }
+          />
+        </View>
       </View>
     </GestureHandlerRootView>
   );
@@ -159,39 +189,48 @@ const ExerciseListNewItem = ({
   const [rpe, setRpe] = React.useState('');
 
   return (
-    <View className="flex flex-1 flex-row p-3 items-center bg-neutral-foreground rounded-lg ">
-      <Text className="text-primary w-full flex-1/5 font-lexend-bold">
-        0{index + 1}
-      </Text>
+    <Swipeable
+      renderRightActions={() => <DeleteAction />}
+      onSwipeableOpen={(direction) => {
+        if (direction === 'right') {
+          onCancel();
+        }
+      }}
+      overshootRight={false}>
+      <View className="flex flex-1 flex-row p-3 items-center bg-neutral-foreground rounded-lg ">
+        <Text className="text-primary w-full flex-1/5 font-lexend-bold">
+          0{index + 1}
+        </Text>
 
-      <View className="flex-1/5">
-        <TextInput
-          className="text-white w-8 border border-neutral-border overflow-hidden flex-1/5 font-lexend-bold bg-neutral rounded"
-          keyboardType="numeric"
-          value={weight}
-          onChangeText={setWeight}
-        />
+        <View className="flex-1/5">
+          <TextInput
+            className="text-white w-8 border border-neutral-border overflow-hidden flex-1/5 font-lexend-bold bg-neutral rounded"
+            keyboardType="numeric"
+            value={weight}
+            onChangeText={setWeight}
+          />
+        </View>
+        <View className="flex-1/5 flex items-start">
+          <TextInput
+            className="text-white w-8 font-lexend-bold bg-neutral border border-neutral-border rounded"
+            keyboardType="numeric"
+            value={reps}
+            onChangeText={setReps}
+          />
+        </View>
+        <View className="flex-1/5 flex items-start">
+          <TextInput
+            className="w-8 border border-neutral-border font-lexend-bold bg-neutral rounded"
+            keyboardType="numeric"
+            value={rpe}
+            onChangeText={setRpe}
+          />
+        </View>
+        <View className="flex-1/5">
+          <Button title="add" />
+        </View>
       </View>
-      <View className="flex-1/5 flex items-start">
-        <TextInput
-          className="text-white w-8 font-lexend-bold bg-neutral border border-neutral-border rounded"
-          keyboardType="numeric"
-          value={reps}
-          onChangeText={setReps}
-        />
-      </View>
-      <View className="flex-1/5 flex items-start">
-        <TextInput
-          className="w-8 border border-neutral-border font-lexend-bold bg-neutral rounded"
-          keyboardType="numeric"
-          value={rpe}
-          onChangeText={setRpe}
-        />
-      </View>
-      <View className="flex-1/5">
-        <Button title="add" />
-      </View>
-    </View>
+    </Swipeable>
   );
 };
 

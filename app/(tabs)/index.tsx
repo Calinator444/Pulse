@@ -4,9 +4,7 @@ import EditCard from '@/components/ui/card';
 
 import {
   ExerciseList,
-  ExerciseListButton,
   ExerciseListItem,
-  ExerciseListNewItem,
 } from '@/components/ui/exercise-list';
 import { Progress, ProgressPoint } from '@/components/ui/progress';
 import { supabase } from '@/utils/supabase';
@@ -27,7 +25,6 @@ type Set = {
 };
 
 export default function HomeScreen() {
-  const [addingItems, setAddingItems] = React.useState<{ key: string }[]>([]);
   const [sets, setSets] = React.useState<Set[]>([
     { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
     { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
@@ -80,7 +77,20 @@ export default function HomeScreen() {
             title="Hypertrophy Chest & Triceps"
             subTitle="Current template"
           />
-          <ExerciseList>
+          <ExerciseList
+            itemCount={sets.length}
+            onAddSet={({ weight, reps, rpe }) => {
+              setSets([
+                ...sets,
+                {
+                  key: crypto.randomUUID(),
+                  rpe,
+                  reps,
+                  weight,
+                  done: false,
+                },
+              ]);
+            }}>
             {sets.map(({ key, ...set }, index) => (
               <ExerciseListItem
                 index={index}
@@ -96,32 +106,6 @@ export default function HomeScreen() {
                 onDelete={() => setSets(sets.filter((s) => s.key !== key))}
               />
             ))}
-
-            {addingItems.map((item, index) => (
-              <ExerciseListNewItem
-                key={item.key}
-                index={sets.length + index}
-                onSave={({ weight, reps, rpe }) => {
-                  setSets([
-                    ...sets,
-                    {
-                      key: crypto.randomUUID(),
-                      rpe,
-                      reps,
-                      weight,
-                      done: false,
-                    },
-                  ]);
-                  setAddingItems([]);
-                }}
-                onCancel={() => setAddingItems([])}
-              />
-            ))}
-            <ExerciseListButton
-              onPress={() =>
-                setAddingItems([...addingItems, { key: crypto.randomUUID() }])
-              }
-            />
           </ExerciseList>
 
           <AddButton label="add next exercise"></AddButton>
