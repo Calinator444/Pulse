@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React, { useLayoutEffect, useState } from 'react';
+import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useResolveClassNames } from 'uniwind';
 
 import { cn } from '@/lib/utils';
@@ -13,10 +14,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import {
-  GestureHandlerRootView,
-  Swipeable,
-} from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const ExerciseList = ({
   children,
@@ -87,9 +85,8 @@ const ExerciseList = ({
 
 const DeleteAction = () => {
   return (
-    <Pressable className="bg-red-500 rounded-lg items-center justify-center px-5 ml-2">
+    <Pressable className="bg-red-500 w-20 rounded-lg items-center justify-center">
       <MaterialIcons name="delete" size={22} color="white" />
-      <Text className="text-white font-lexend-bold text-xs mt-1">Delete</Text>
     </Pressable>
   );
 };
@@ -130,13 +127,13 @@ const ExerciseListItem = ({
   }, []);
   return (
     <Swipeable
+      enabled={true}
       renderRightActions={() => <DeleteAction />}
       onSwipeableOpen={(direction) => {
         if (direction === 'right') {
           onDelete?.();
         }
-      }}
-      overshootRight={false}>
+      }}>
       <View
         ref={containerRef}
         className={cn(
