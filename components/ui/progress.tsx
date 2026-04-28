@@ -39,17 +39,23 @@ const ProgressPoint = ({
   return (
     <View className="size-20 flex items-center gap-2 flex-col bg-background">
       <View
+        style={{
+          boxShadow:
+            variant === 'active'
+              ? '0px 0px 16px rgba(255, 255, 255, 0.5)'
+              : undefined,
+        }}
         className={cn(
-          'bg-primary outline-4 outline-solid outline-background shadow-primary size-10 rounded-full',
+          'bg-primary outline-4 outline-solid outline-background drop-shadow-2xl shadow-primary size-10 rounded-full',
           variant === 'inactive' && 'bg-muted',
-          variant === 'active' && 'shadow-primary shadow-[0_0_16px]/60',
+          variant === 'active' && 'shadow-primary',
         )}>
         {children}
       </View>
       {label && (
         <Text
           className={cn(
-            'tracking-wider uppercase text-[10px] font-lexend-bold',
+            'tracking-wide uppercase text-[10px] font-lexend-bold',
             variant === 'inactive' ? 'text-white/50' : 'text-primary',
           )}>
           {label}

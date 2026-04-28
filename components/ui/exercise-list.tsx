@@ -47,19 +47,31 @@ const ExerciseList = ({
           <Text className="text-white font-lexend-bold uppercase text-xl">
             Romanian Deadlift
           </Text>
-          <Text className="uppercase bg-secondary-alt/30 tracking-widest self-start py-0.5 px-2 rounded-md font-lexend-semiBold text-xs text-secondary">
+          <Text
+            style={{
+              paddingHorizontal: 8,
+            }}
+            className="uppercase bg-secondary-alt/30 tracking-wider self-start py-0.5 rounded-md font-lexend-semiBold text-xs text-secondary">
             Legs
           </Text>
         </View>
-        <View className="flex flex-row *:uppercase *:font-lexend-bold p-3 *:text-neutral-text *:text-xs">
-          <Text className="flex-1/5">set</Text>
-          <Text className="flex-1/5">weight</Text>
-          <Text className="flex-1/5">reps</Text>
-          <Text className="flex-2/5">Target</Text>
+        <View className="flex flex-row *: p-3 **: *:s">
+          <Text className="flex-1/5 text-xs text-neutral-text font-lexend-bold uppercase">
+            set
+          </Text>
+          <Text className="flex-1/5 text-xs text-neutral-text  font-lexend-bold uppercase">
+            weight
+          </Text>
+          <Text className="flex-1/5 text-xs text-neutral-text font-lexend-bold uppercase">
+            reps
+          </Text>
+          <Text className="flex-2/5 text-xs text-neutral-text font-lexend-bold uppercase">
+            Target
+          </Text>
         </View>
         <View className="gap-4">
           {children}
-          {addingItems.map((item, index) => (
+          {/* {addingItems.map((item, index) => (
             <ExerciseListNewItem
               key={item.key}
               index={itemCount + index}
@@ -71,11 +83,9 @@ const ExerciseList = ({
                 setAddingItems(addingItems.filter((i) => i.key !== item.key))
               }
             />
-          ))}
+          ))} */}
           <ExerciseListButton
-            onPress={() =>
-              setAddingItems([...addingItems, { key: crypto.randomUUID() }])
-            }
+            onPress={() => onAddSet({ weight: 0, reps: 0, rpe: 0 })}
           />
         </View>
       </View>

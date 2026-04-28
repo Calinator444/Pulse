@@ -2,10 +2,9 @@ import { ThemedView } from '@/components/themed-view';
 import AddButton from '@/components/ui/add-button';
 import EditCard from '@/components/ui/card';
 
-import {
-  ExerciseList,
-  ExerciseListItem,
-} from '@/components/ui/exercise-list';
+import * as Crypto from 'expo-crypto';
+
+import { ExerciseList } from '@/components/ui/exercise-list';
 import { Progress, ProgressPoint } from '@/components/ui/progress';
 import { supabase } from '@/utils/supabase';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -26,9 +25,9 @@ type Set = {
 
 export default function HomeScreen() {
   const [sets, setSets] = React.useState<Set[]>([
-    { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
-    { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
-    { key: crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
+    { key: Crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
+    { key: Crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
+    { key: Crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
   ]);
   useEffect(() => {
     const getTodos = async () => {
@@ -77,13 +76,14 @@ export default function HomeScreen() {
             title="Hypertrophy Chest & Triceps"
             subTitle="Current template"
           />
+
           <ExerciseList
             itemCount={sets.length}
             onAddSet={({ weight, reps, rpe }) => {
               setSets([
                 ...sets,
                 {
-                  key: crypto.randomUUID(),
+                  key: Crypto.randomUUID(),
                   rpe,
                   reps,
                   weight,
@@ -91,7 +91,16 @@ export default function HomeScreen() {
                 },
               ]);
             }}>
-            {sets.map(({ key, ...set }, index) => (
+            {/* <Animated.FlatList
+              renderItem={({ item }) => (
+                <Text key={item.key}>{item.weight}</Text>
+              )}
+              // keyExtractor={(item) => item.key}
+              itemLayoutAnimation={LinearTransition}
+              data={sets}
+              // scrollEnabled={false}
+            /> */}
+            {/* {sets.map(({ key, ...set }, index) => (
               <ExerciseListItem
                 index={index}
                 key={key}
@@ -105,7 +114,7 @@ export default function HomeScreen() {
                 }
                 onDelete={() => setSets(sets.filter((s) => s.key !== key))}
               />
-            ))}
+            ))} */}
           </ExerciseList>
 
           <AddButton label="add next exercise"></AddButton>
