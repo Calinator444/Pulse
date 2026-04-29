@@ -1,7 +1,9 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useLayoutEffect, useState } from 'react';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useResolveClassNames } from 'uniwind';
 
 import { cn } from '@/lib/utils';
@@ -16,6 +18,29 @@ import {
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+const styles = StyleSheet.create((theme) => ({
+  thingy: {
+    backgroundColor: theme.colors.primary,
+  },
+  badge: {
+    includeFontPadding: false,
+    paddingVertical: theme.gap(0.5),
+    tracking: 20,
+    paddingHorizontal: theme.gap(1),
+    borderRadius: theme.gap(0.5),
+    backgroundColor: theme.colors.secondary(0.3),
+    backgroundTransparency: 0.3,
+    backgroundBlendMode: 'overlay',
+    letterSpacing: 1.5,
+    backgroundOpacity: 0,
+    color: theme.colors.onSecondary(),
+    fontWeight: 'bold',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    alignSelf: 'flex-start',
+  },
+}));
+
 const ExerciseList = ({
   children,
   itemCount,
@@ -26,34 +51,45 @@ const ExerciseList = ({
   onAddSet: (values: { weight: number; reps: number; rpe: number }) => void;
 }) => {
   const [addingItems, setAddingItems] = React.useState<{ key: string }[]>([]);
-
+  const { theme } = useUnistyles();
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className="p-6 transition-transform rounded-lg bg-neutral overflow-hidden">
-        <View className="absolute grayscale mask-top from-transparent t inset-0 mask-b-from-0% h-40 overflow-hidden w-full">
-          <Image
-            style={{
-              position: 'absolute',
-              top: 1 / 2,
-              left: 1 / 2,
-              height: 160,
-              opacity: 0.4,
-              width: '100%',
-            }}
-            source={require('@/assets/images/barbell.png')}
-          />
-        </View>
+      <View className="transition-transform p-6 rounded-lg bg-neutral overflow-hidden">
+        {/* <View
+          style={{
+            position: 'absolute',
+            inset: 0,
+            height: 160,
+
+            // width: '100%',
+          }}
+          className="w-full"> */}
+        <Image
+          style={{
+            position: 'absolute',
+
+            inset: 0,
+            height: 168,
+            opacity: 0.4,
+          }}
+          contentFit="cover"
+          source={require('@/assets/images/barbell.png')}
+        />
+        <LinearGradient
+          style={{
+            position: 'absolute',
+            inset: 0,
+            top: 1 / 2,
+            left: 1 / 2,
+            height: 168,
+          }}
+          colors={['transparent', theme.colors.neutral]}></LinearGradient>
+        {/* </View> */}
         <View className="h-30 justify-end">
           <Text className="text-white font-lexend-bold uppercase text-xl">
             Romanian Deadlift
           </Text>
-          <Text
-            style={{
-              paddingHorizontal: 8,
-            }}
-            className="uppercase bg-secondary-alt/30 tracking-wider self-start py-0.5 rounded-md font-lexend-semiBold text-xs text-secondary">
-            Legs
-          </Text>
+          <Text style={styles.badge}>Legs</Text>
         </View>
         <View className="flex flex-row *: p-3 **: *:s">
           <Text className="flex-1/5 text-xs text-neutral-text font-lexend-bold uppercase">
@@ -246,8 +282,14 @@ const ExerciseListButton = (props: PressableProps) => {
     <Pressable
       {...props}
       className="border-2 rounded-md border-neutral-border border-dashed p-4">
-      <Text className="uppercase flex items-center font-lexend-semiBold text-[12px] gap-2 justify-center text-neutral-text">
-        <MaterialCommunityIcons size={20} name="plus" />
+      <Text
+        style={{ includeFontPadding: false }}
+        className="uppercase flex flex-row text-center items-center  font-lexend-semiBold text-[12px] gap-2 justify-center text-neutral-text">
+        <MaterialCommunityIcons
+          style={{ includeFontPadding: false }}
+          size={20}
+          name="plus"
+        />
         Add Set
       </Text>
     </Pressable>
