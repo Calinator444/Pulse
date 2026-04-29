@@ -5,7 +5,20 @@ const mainTheme = {
     primary: '#aa12ff',
     onSecondary: (opacity: number = 1) => `rgba(0, 227, 253, ${opacity})`,
     secondary: (opacity: number = 1) => `rgba(0, 104, 117, ${opacity})`,
+
+    surface: (opacity: number = 1) => `rgba(23, 26, 31, ${opacity})`,
+    onSurface: (opacity: number = 1) => `rgba(116, 117, 122, ${opacity})`,
     neutral: '#171a1f',
+  },
+  fonts: {
+    lexend: 'Lexend-Regular',
+    lexendBold: 'Lexend-Bold',
+    lexendExtraBold: 'Lexend-ExtraBold',
+    lexendExtraLight: 'Lexend-ExtraLight',
+    lexendSemiBold: 'Lexend-SemiBold',
+    lexendMedium: 'Lexend-Medium',
+    lexendLight: 'Lexend-Light',
+    lexendThin: 'Lexend-Thin',
   },
   sizes: {
     text: {

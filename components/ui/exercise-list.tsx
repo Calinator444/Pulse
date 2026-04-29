@@ -19,9 +19,6 @@ import {
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const styles = StyleSheet.create((theme) => ({
-  thingy: {
-    backgroundColor: theme.colors.primary,
-  },
   badge: {
     includeFontPadding: false,
     paddingVertical: theme.gap(0.5),
@@ -38,6 +35,27 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: 10,
     textTransform: 'uppercase',
     alignSelf: 'flex-start',
+  },
+  addButtonContents: {
+    alignSelf: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+    flexDirection: 'row',
+    gap: theme.gap(0.5),
+    color: theme.colors.onSurface(),
+  },
+  addButtonText: {
+    textTransform: 'uppercase',
+    fontSize: 12,
+    includeFontPadding: false,
+    letterSpacing: 1,
+    fontFamily: theme.fonts.lexendSemiBold,
+    color: theme.colors.onSurface(),
+  },
+  addButtonIcon: {
+    fontSize: 15,
+    strokeWidth: 2,
   },
 }));
 
@@ -67,7 +85,6 @@ const ExerciseList = ({
         <Image
           style={{
             position: 'absolute',
-
             inset: 0,
             height: 168,
             opacity: 0.4,
@@ -79,8 +96,6 @@ const ExerciseList = ({
           style={{
             position: 'absolute',
             inset: 0,
-            top: 1 / 2,
-            left: 1 / 2,
             height: 168,
           }}
           colors={['transparent', theme.colors.neutral]}></LinearGradient>
@@ -281,17 +296,17 @@ const ExerciseListButton = (props: PressableProps) => {
   return (
     <Pressable
       {...props}
-      className="border-2 rounded-md border-neutral-border border-dashed p-4">
-      <Text
-        style={{ includeFontPadding: false }}
-        className="uppercase flex flex-row text-center items-center  font-lexend-semiBold text-[12px] gap-2 justify-center text-neutral-text">
+      className="border-2 rounded-md border-neutral-border border-dashed p-5">
+      <View style={styles.addButtonContents}>
         <MaterialCommunityIcons
-          style={{ includeFontPadding: false }}
+          style={[styles.addButtonText, styles.addButtonIcon]}
           size={20}
           name="plus"
         />
-        Add Set
-      </Text>
+        <Text className="" style={[styles.addButtonText]}>
+          Add Set
+        </Text>
+      </View>
     </Pressable>
   );
 };
