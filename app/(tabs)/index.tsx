@@ -4,6 +4,7 @@ import EditCard from '@/components/ui/card';
 
 import * as Crypto from 'expo-crypto';
 
+import { SortableListsExample } from '@/components/animation-test';
 import { ExerciseList } from '@/components/ui/exercise-list';
 import { Progress, ProgressPoint } from '@/components/ui/progress';
 import { supabase } from '@/utils/supabase';
@@ -12,7 +13,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import React, { useEffect } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 type Set = {
@@ -41,57 +42,25 @@ export default function HomeScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1 bg-background ">
-        <ScrollView contentContainerClassName="gap-8 p-5" className="">
-          <Image
-            source={require('../../assets/images/pulse-logo.png')}
-            style={{ width: 109, height: 32 }}
-          />
-          <Progress className="mt-8">
-            <ProgressPoint label="details">
-              <Text className="text-primary-foreground left-1/2 top-1/2 -translate-x-1/2 absolute -translate-y-1/2">
-                <MaterialIcons name="check" size={18} color="black" />
-              </Text>
-            </ProgressPoint>
-            <ProgressPoint variant="active" label="exercises">
-              <Text className="text-primary-foreground left-1/2 top-1/2 -translate-x-1/2 absolute -translate-y-1/2">
-                <MaterialCommunityIcons name="flag-outline" size={18} />
-              </Text>
-            </ProgressPoint>
-            <ProgressPoint variant="inactive" label="finish">
-              <Text className="text-white/50 left-1/2 top-1/2 -translate-x-1/2 absolute -translate-y-1/2">
-                <MaterialCommunityIcons name="flag-outline" size={18} />
-              </Text>
-            </ProgressPoint>
-          </Progress>
-          <View>
-            <Text className="font-lexend-extraBold text-2xl uppercase text-white">
-              Add exercises
-            </Text>
-            <Text className="text-muted-alt font-lexend-extraLight text-sm">
-              Structure your workout with precision sets and metrics.
-            </Text>
-          </View>
-
-          <EditCard
-            title="Hypertrophy Chest & Triceps"
-            subTitle="Current template"
-          />
-
-          <ExerciseList
-            itemCount={sets.length}
-            onAddSet={({ weight, reps, rpe }) => {
-              setSets([
-                ...sets,
-                {
-                  key: Crypto.randomUUID(),
-                  rpe,
-                  reps,
-                  weight,
-                  done: false,
-                },
-              ]);
-            }}>
-            {/* <Animated.FlatList
+        <FlatList
+          data={sets}
+          renderItem={({ item }) => (
+            <ExerciseList
+              itemCount={sets.length}
+              onAddSet={({ weight, reps, rpe }) => {
+                setSets([
+                  ...sets,
+                  {
+                    key: Crypto.randomUUID(),
+                    rpe,
+                    reps,
+                    weight,
+                    done: false,
+                  },
+                ]);
+              }}>
+              <SortableListsExample />
+              {/* <Animated.FlatList
               renderItem={({ item }) => (
                 <Text key={item.key}>{item.weight}</Text>
               )}
@@ -100,7 +69,7 @@ export default function HomeScreen() {
               data={sets}
               // scrollEnabled={false}
             /> */}
-            {/* {sets.map(({ key, ...set }, index) => (
+              {/* {sets.map(({ key, ...set }, index) => (
               <ExerciseListItem
                 index={index}
                 key={key}
@@ -115,38 +84,84 @@ export default function HomeScreen() {
                 onDelete={() => setSets(sets.filter((s) => s.key !== key))}
               />
             ))} */}
-          </ExerciseList>
+            </ExerciseList>
+          )}
+          ListHeaderComponent={
+            <>
+              <Image
+                source={require('../../assets/images/pulse-logo.png')}
+                style={{ width: 109, height: 32 }}
+              />
 
-          <AddButton label="add next exercise"></AddButton>
+              <Progress className="mt-8">
+                <ProgressPoint label="details">
+                  <Text className="text-primary-foreground left-1/2 top-1/2 -translate-x-1/2 absolute -translate-y-1/2">
+                    <MaterialIcons name="check" size={18} color="black" />
+                  </Text>
+                </ProgressPoint>
+                <ProgressPoint variant="active" label="exercises">
+                  <Text className="text-primary-foreground left-1/2 top-1/2 -translate-x-1/2 absolute -translate-y-1/2">
+                    <MaterialCommunityIcons name="flag-outline" size={18} />
+                  </Text>
+                </ProgressPoint>
+                <ProgressPoint variant="inactive" label="finish">
+                  <Text className="text-white/50 left-1/2 top-1/2 -translate-x-1/2 absolute -translate-y-1/2">
+                    <MaterialCommunityIcons name="flag-outline" size={18} />
+                  </Text>
+                </ProgressPoint>
+              </Progress>
+              <View>
+                <Text className="font-lexend-extraBold text-2xl uppercase text-white">
+                  Add exercises
+                </Text>
+                <Text className="text-muted-alt font-lexend-extraLight text-sm">
+                  Structure your workout with precision sets and metrics.
+                </Text>
+              </View>
 
-          <ThemedView style={styles.stepContainer}>
-            <Link href="/modal">
-              <Link.Trigger></Link.Trigger>
-              <Link.Preview />
-              <Link.Menu>
-                <Link.MenuAction
-                  title="Action"
-                  icon="cube"
-                  onPress={() => alert('Action pressed')}
-                />
-                <Link.MenuAction
-                  title="Share"
-                  icon="square.and.arrow.up"
-                  onPress={() => alert('Share pressed')}
-                />
-                <Link.Menu title="More" icon="ellipsis">
-                  <Link.MenuAction
-                    title="Delete"
-                    icon="trash"
-                    destructive
-                    onPress={() => alert('Delete pressed')}
-                  />
-                </Link.Menu>
-              </Link.Menu>
-            </Link>
-          </ThemedView>
+              <EditCard
+                title="Hypertrophy Chest & Triceps"
+                subTitle="Current template"
+              />
+            </>
+          }
+          ListFooterComponent={
+            <>
+              <AddButton label="add next exercise"></AddButton>
 
-          {/* <View className="flex-row gap-2">
+              <ThemedView style={styles.stepContainer}>
+                <Link href="/modal">
+                  <Link.Trigger></Link.Trigger>
+                  <Link.Preview />
+                  <Link.Menu>
+                    <Link.MenuAction
+                      title="Action"
+                      icon="cube"
+                      onPress={() => alert('Action pressed')}
+                    />
+                    <Link.MenuAction
+                      title="Share"
+                      icon="square.and.arrow.up"
+                      onPress={() => alert('Share pressed')}
+                    />
+                    <Link.Menu title="More" icon="ellipsis">
+                      <Link.MenuAction
+                        title="Delete"
+                        icon="trash"
+                        destructive
+                        onPress={() => alert('Delete pressed')}
+                      />
+                    </Link.Menu>
+                  </Link.Menu>
+                </Link>
+              </ThemedView>
+            </>
+          }
+          contentContainerClassName="gap-8 p-5"
+          className=""
+        />
+
+        {/* <View className="flex-row gap-2">
             <TextInput
               value={newTask}
               onChangeText={setNewTask}
@@ -163,7 +178,7 @@ export default function HomeScreen() {
             </Pressable>
           </View> */}
 
-          {/* {todos.length > 0 ? (
+        {/* {todos.length > 0 ? (
             <View>
               <Text className="font-lexend-extraBold text-xl uppercase text-white mb-2">
                 Todos
@@ -179,7 +194,6 @@ export default function HomeScreen() {
           ) : (
             <Text className="text-white">No Todos yet</Text>
           )} */}
-        </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
   );
