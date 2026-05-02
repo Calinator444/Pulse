@@ -1,6 +1,5 @@
 type Set = {
   id: string;
-  index: number;
   rpe: number;
   reps: number;
   weight: number;

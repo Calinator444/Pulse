@@ -345,6 +345,7 @@ const ExerciseListSortable = ({
         item,
         id,
         positions,
+        index,
         lowerBound,
         autoScrollDirection,
         itemsCount,
@@ -378,7 +379,7 @@ const ExerciseListSortable = ({
           }}>
           <ExerciseListItem
             id={item.id}
-            index={item.index}
+            index={index}
             rpe={item.rpe}
             weight={item.weight}
             reps={item.reps}

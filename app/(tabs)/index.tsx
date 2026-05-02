@@ -16,7 +16,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  const [sets, setSets] = React.useState<Omit<Set, 'index'>[]>([
+  const [sets, setSets] = React.useState<Set[]>([
     {
       id: Crypto.randomUUID(),
       rpe: 8,
@@ -58,7 +58,7 @@ export default function HomeScreen() {
           data={exercises}
           renderItem={({ item }) => (
             <ExerciseList
-              items={sets.map((set, index) => ({ ...set, index }))}
+              items={sets}
               onDrop={(id, position) => {
                 const newSets = [...sets];
                 const draggedIndex = sets.findIndex((s) => s.id === id);
