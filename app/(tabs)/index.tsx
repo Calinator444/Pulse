@@ -1,10 +1,9 @@
 import { ThemedView } from '@/components/themed-view';
 import AddButton from '@/components/ui/add-button';
 import EditCard from '@/components/ui/card';
-
+import { Set } from '@/lib/types';
 import * as Crypto from 'expo-crypto';
 
-import { SortableListsExample } from '@/components/animation-test';
 import { ExerciseList } from '@/components/ui/exercise-list';
 import { Progress, ProgressPoint } from '@/components/ui/progress';
 import { supabase } from '@/utils/supabase';
@@ -16,22 +15,33 @@ import React, { useEffect } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-type Set = {
-  key: string;
-  rpe: number;
-  reps: number;
-  weight: number;
-  done: boolean;
-};
-
 export default function HomeScreen() {
-  const [sets, setSets] = React.useState<Set[]>([
-    { key: Crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
-    { key: Crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
-    { key: Crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
+  const [sets, setSets] = React.useState<Omit<Set, 'index'>[]>([
+    {
+      id: Crypto.randomUUID(),
+      rpe: 8,
+      reps: 10,
+      weight: 30,
+      done: false,
+    },
+    {
+      id: Crypto.randomUUID(),
+      rpe: 8,
+      reps: 10,
+      weight: 40,
+      done: false,
+    },
+    {
+      id: Crypto.randomUUID(),
+      rpe: 8,
+      reps: 10,
+      weight: 50,
+      done: false,
+    },
   ]);
 
-  const [scrollEnabled, setScrollEnabled] = React.useState(true);
+  const [exercises, setExercises] = React.useState([1]);
+
   useEffect(() => {
     const getTodos = async () => {
       let result = await supabase.from('workouts').select('id, sets (rpe) ');
@@ -45,52 +55,31 @@ export default function HomeScreen() {
     <SafeAreaProvider>
       <SafeAreaView className="flex-1 bg-background ">
         <FlatList
-          scrollEnabled={scrollEnabled}
-          data={sets}
+          data={exercises}
           renderItem={({ item }) => (
             <ExerciseList
-              itemCount={sets.length}
+              items={sets.map((set, index) => ({ ...set, index }))}
+              onDrop={(id, position) => {
+                const newSets = [...sets];
+                const draggedIndex = sets.findIndex((s) => s.id === id);
+                const swap = newSets[position];
+                newSets[position] = newSets[draggedIndex];
+                newSets[draggedIndex] = swap;
+                setSets([...newSets]);
+              }}
               onAddSet={({ weight, reps, rpe }) => {
                 setSets([
                   ...sets,
                   {
-                    key: Crypto.randomUUID(),
+                    id: Crypto.randomUUID(),
                     rpe,
                     reps,
                     weight,
                     done: false,
                   },
                 ]);
-              }}>
-              <SortableListsExample
-                onDragStart={() => setScrollEnabled(false)}
-                onDrop={() => setScrollEnabled(true)}
-              />
-              {/* <Animated.FlatList
-              renderItem={({ item }) => (
-                <Text key={item.key}>{item.weight}</Text>
-              )}
-              // keyExtractor={(item) => item.key}
-              itemLayoutAnimation={LinearTransition}
-              data={sets}
-              // scrollEnabled={false}
-            /> */}
-              {/* {sets.map(({ key, ...set }, index) => (
-              <ExerciseListItem
-                index={index}
-                key={key}
-                {...set}
-                onCompleteChanged={(val) =>
-                  setSets([
-                    ...sets.slice(0, index),
-                    { ...set, done: val, key },
-                    ...sets.slice(index + 1),
-                  ])
-                }
-                onDelete={() => setSets(sets.filter((s) => s.key !== key))}
-              />
-            ))} */}
-            </ExerciseList>
+              }}
+            />
           )}
           ListHeaderComponent={
             <>
@@ -163,7 +152,7 @@ export default function HomeScreen() {
               </ThemedView>
             </>
           }
-          contentContainerClassName="gap-8 p-5"
+          contentContainerClassName="gap-8 p-"
           className=""
         />
 

@@ -13,6 +13,7 @@ import Auth from '@/components/auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/utils/supabase';
 import { Session } from '@supabase/supabase-js';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -51,19 +52,21 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack
-        screenOptions={{
-          contentStyle: {
-            backgroundColor: 'rgb(0, 0, 0)',
-          },
-        }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: 'modal', title: 'Modal' }}
-        />
-      </Stack>
-      <StatusBar style="auto" />
+      <GestureHandlerRootView>
+        <Stack
+          screenOptions={{
+            contentStyle: {
+              backgroundColor: 'rgb(0, 0, 0)',
+            },
+          }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="modal"
+            options={{ presentation: 'modal', title: 'Modal' }}
+          />
+        </Stack>
+        <StatusBar style="auto" />
+      </GestureHandlerRootView>
     </ThemeProvider>
   );
 }

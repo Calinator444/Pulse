@@ -1,11 +1,17 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import {
+  Sortable,
+  SortableItem,
+  SortableRenderItemProps,
+} from 'react-native-reanimated-dnd';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useResolveClassNames } from 'uniwind';
 
+import { Set } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Image } from 'expo-image';
 import {
@@ -16,7 +22,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const styles = StyleSheet.create((theme) => ({
   badge: {
@@ -60,87 +65,69 @@ const styles = StyleSheet.create((theme) => ({
 }));
 
 const ExerciseList = ({
-  children,
-  itemCount,
+  items,
+  onDrop,
+  onDragStart,
   onAddSet,
 }: {
   children?: React.ReactNode;
-  itemCount: number;
+
+  onDragStart?: (id: string, position: number) => void;
+  onDrop: (id: string, position: number) => void;
+  items: Set[];
   onAddSet: (values: { weight: number; reps: number; rpe: number }) => void;
 }) => {
-  const [addingItems, setAddingItems] = React.useState<{ key: string }[]>([]);
   const { theme } = useUnistyles();
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className="transition-transform p-6 rounded-lg bg-neutral overflow-hidden">
-        {/* <View
-          style={{
-            position: 'absolute',
-            inset: 0,
-            height: 160,
-
-            // width: '100%',
-          }}
-          className="w-full"> */}
-        <Image
-          style={{
-            position: 'absolute',
-            inset: 0,
-            height: 168,
-            opacity: 0.4,
-          }}
-          contentFit="cover"
-          source={require('@/assets/images/barbell.png')}
-        />
-        <LinearGradient
-          style={{
-            position: 'absolute',
-            inset: 0,
-            height: 168,
-          }}
-          colors={['transparent', theme.colors.neutral]}></LinearGradient>
-        {/* </View> */}
-        <View className="h-30 justify-end">
-          <Text className="text-white font-lexend-bold uppercase text-xl">
-            Romanian Deadlift
-          </Text>
-          <Text style={styles.badge}>Legs</Text>
-        </View>
-        <View className="flex flex-row *: p-3 **: *:s">
-          <Text className="flex-1/5 text-xs text-neutral-text font-lexend-bold uppercase">
-            set
-          </Text>
-          <Text className="flex-1/5 text-xs text-neutral-text  font-lexend-bold uppercase">
-            weight
-          </Text>
-          <Text className="flex-1/5 text-xs text-neutral-text font-lexend-bold uppercase">
-            reps
-          </Text>
-          <Text className="flex-2/5 text-xs text-neutral-text font-lexend-bold uppercase">
-            Target
-          </Text>
-        </View>
-        <View className="gap-4">
-          {children}
-          {/* {addingItems.map((item, index) => (
-            <ExerciseListNewItem
-              key={item.key}
-              index={itemCount + index}
-              onSave={(values) => {
-                onAddSet(values);
-                setAddingItems(addingItems.filter((i) => i.key !== item.key));
-              }}
-              onCancel={() =>
-                setAddingItems(addingItems.filter((i) => i.key !== item.key))
-              }
-            />
-          ))} */}
-          <ExerciseListButton
-            onPress={() => onAddSet({ weight: 0, reps: 0, rpe: 0 })}
-          />
-        </View>
+    <View className="transition-transform p-6 rounded-lg bg-neutral overflow-hidden">
+      <Image
+        style={{
+          position: 'absolute',
+          inset: 0,
+          height: 168,
+          opacity: 0.4,
+        }}
+        contentFit="cover"
+        source={require('@/assets/images/barbell.png')}
+      />
+      <LinearGradient
+        style={{
+          position: 'absolute',
+          inset: 0,
+          height: 168,
+        }}
+        colors={['transparent', theme.colors.neutral]}></LinearGradient>
+      <View className="h-30 justify-end">
+        <Text className="text-white font-lexend-bold uppercase text-xl">
+          Romanian Deadlift
+        </Text>
+        <Text style={styles.badge}>Legs</Text>
       </View>
-    </GestureHandlerRootView>
+      <View className="flex flex-row *: p-3 **: *:s">
+        <Text className="flex-1/5 text-xs text-neutral-text font-lexend-bold uppercase">
+          set
+        </Text>
+        <Text className="flex-1/5 text-xs text-neutral-text  font-lexend-bold uppercase">
+          weight
+        </Text>
+        <Text className="flex-1/5 text-xs text-neutral-text font-lexend-bold uppercase">
+          reps
+        </Text>
+        <Text className="flex-2/5 text-xs text-neutral-text font-lexend-bold uppercase">
+          Target
+        </Text>
+      </View>
+      <View className="gap-4">
+        <ExerciseListSortable
+          onDragStart={onDragStart}
+          onDrop={onDrop}
+          items={items}
+        />
+        <ExerciseListButton
+          onPress={() => onAddSet({ weight: 0, reps: 0, rpe: 0 })}
+        />
+      </View>
+    </View>
   );
 };
 
@@ -160,13 +147,8 @@ const ExerciseListItem = ({
   done = false,
   onCompleteChanged,
   onDelete,
-}: {
+}: Set & {
   index: number;
-  rpe: number;
-  reps: number;
-  done: boolean;
-  weight: number;
-  animate?: boolean;
   onCompleteChanged?: (value: boolean) => void;
   onDelete?: () => void;
 }) => {
@@ -335,12 +317,7 @@ const Checkbox = ({
       accessibilityRole="checkbox"
       accessibilityState={{ checked }}>
       {checked && (
-        <MaterialCommunityIcons
-          name="check"
-          style={button}
-          size={18}
-          color=""
-        />
+        <MaterialCommunityIcons name="check" style={button} size={18} />
       )}
     </Pressable>
   );
@@ -353,3 +330,72 @@ export {
   ExerciseListNewItem
 };
 
+const ExerciseListSortable = ({
+  onDragStart,
+  onDrop,
+  items,
+}: {
+  onDragStart?: (id: string, position: number) => void;
+  onDrop?: (id: string, position: number) => void;
+  items: Set[];
+}) => {
+  const renderItem = useCallback(
+    (props: SortableRenderItemProps<Set>) => {
+      const {
+        item,
+        id,
+        positions,
+        lowerBound,
+        autoScrollDirection,
+        itemsCount,
+        itemHeight,
+      } = props;
+
+      return (
+        <SortableItem
+          key={id}
+          id={id}
+          data={item}
+          positions={positions}
+          lowerBound={lowerBound}
+          autoScrollDirection={autoScrollDirection}
+          itemsCount={itemsCount}
+          itemHeight={itemHeight}
+          containerHeight={1200}
+          onMove={(currentId, from, to) => {
+            console.log(`Item ${currentId} moved from ${from} to ${to}`);
+          }}
+          onDragStart={(id, position) => {
+            console.log();
+            if (onDragStart) {
+              onDragStart(id, position);
+            }
+          }}
+          onDrop={(id, position) => {
+            if (onDrop) {
+              onDrop(id, position);
+            }
+          }}>
+          <ExerciseListItem
+            id={item.id}
+            index={item.index}
+            rpe={item.rpe}
+            weight={item.weight}
+            reps={item.reps}
+            done={item.done}
+          />
+        </SortableItem>
+      );
+    },
+    [onDragStart, onDrop],
+  );
+
+  return (
+    <Sortable
+      data={items}
+      itemKeyExtractor={(item) => item.id}
+      renderItem={renderItem}
+      itemHeight={45}
+    />
+  );
+};
