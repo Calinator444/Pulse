@@ -11,7 +11,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
@@ -42,6 +42,27 @@ export default function HomeScreen() {
 
   const [exercises, setExercises] = React.useState([1]);
 
+  const handleDrop = useCallback((id: string, position: number) => {
+    setSets((prev) => {
+      const newSets = [...prev];
+      const draggedIndex = prev.findIndex((s) => s.id === id);
+      const swap = newSets[position];
+      newSets[position] = newSets[draggedIndex];
+      newSets[draggedIndex] = swap;
+      return [...newSets];
+    });
+  }, []);
+
+  const handleAddSet = useCallback(
+    ({ weight, reps, rpe }: { weight: number; reps: number; rpe: number }) => {
+      setSets((prev) => [
+        ...prev,
+        { id: Crypto.randomUUID(), rpe, reps, weight, done: false },
+      ]);
+    },
+    [],
+  );
+
   useEffect(() => {
     const getTodos = async () => {
       let result = await supabase.from('workouts').select('id, sets (rpe) ');
@@ -56,31 +77,16 @@ export default function HomeScreen() {
       <SafeAreaView className="flex-1 bg-background ">
         <FlatList
           data={exercises}
-          renderItem={({ item }) => (
-            <ExerciseList
-              items={sets}
-              onDrop={(id, position) => {
-                const newSets = [...sets];
-                const draggedIndex = sets.findIndex((s) => s.id === id);
-                const swap = newSets[position];
-                newSets[position] = newSets[draggedIndex];
-                newSets[draggedIndex] = swap;
-                setSets([...newSets]);
-              }}
-              onAddSet={({ weight, reps, rpe }) => {
-                setSets([
-                  ...sets,
-                  {
-                    id: Crypto.randomUUID(),
-                    rpe,
-                    reps,
-                    weight,
-                    done: false,
-                  },
-                ]);
-              }}
-            />
-          )}
+          renderItem={({ item }) => {
+            console.log('rendering exercise list');
+            return (
+              <ExerciseList
+                items={sets}
+                onDrop={handleDrop}
+                onAddSet={handleAddSet}
+              />
+            );
+          }}
           ListHeaderComponent={
             <>
               <Image

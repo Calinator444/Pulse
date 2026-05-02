@@ -1,8 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useLayoutEffect, useState } from 'react';
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Sortable,
   SortableItem,
@@ -77,6 +76,9 @@ const ExerciseList = ({
   items: Set[];
   onAddSet: (values: { weight: number; reps: number; rpe: number }) => void;
 }) => {
+  useEffect(() => {
+    console.log('exercise list mounted');
+  }, []);
   const { theme } = useUnistyles();
   return (
     <View className="transition-transform p-6 rounded-lg bg-neutral overflow-hidden">
@@ -139,44 +141,42 @@ const DeleteAction = () => {
   );
 };
 
-const ExerciseListItem = ({
-  index,
-  rpe,
-  reps,
-  weight,
-  done = false,
-  onCompleteChanged,
-  onDelete,
-}: Set & {
-  index: number;
-  onCompleteChanged?: (value: boolean) => void;
-  onDelete?: () => void;
-}) => {
-  const finalTextBoxRef = React.useRef<Text | null>(null);
+const ExerciseListItem = React.memo(
+  ({
+    // index,
+    rpe,
+    reps,
+    weight,
+    done = false,
+    onCompleteChanged,
+    onDelete,
+  }: Set & {
+    // index: number;
+    onCompleteChanged?: (value: boolean) => void;
+    onDelete?: () => void;
+  }) => {
+    useEffect(() => {
+      console.log('mounting item', { rpe, reps, weight, done });
+    }, []);
+    console.log('rendering item', { rpe, reps, weight, done });
+    const finalTextBoxRef = React.useRef<Text | null>(null);
 
-  const containerRef = React.useRef<View | null>(null);
-  const [strokeWidth, setStrokeWidth] = useState(0);
+    const containerRef = React.useRef<View | null>(null);
+    const [strokeWidth, setStrokeWidth] = useState(0);
 
-  useLayoutEffect(() => {
-    finalTextBoxRef.current?.measureInWindow((tx, ty, tw) => {
-      containerRef.current?.measureInWindow((cx, cy, cw) => {
-        const endOfTextBox = tx + tw;
-        const endOfContainer = cx + cw;
-        const distanceTextBoxContainerEnd = endOfContainer - endOfTextBox;
-        const finalWidth = cw - distanceTextBoxContainerEnd - 4;
-        setStrokeWidth(finalWidth);
-      });
-    });
-  }, []);
-  return (
-    <Swipeable
-      enabled={true}
-      renderRightActions={() => <DeleteAction />}
-      onSwipeableOpen={(direction) => {
-        if (direction === 'right') {
-          onDelete?.();
-        }
-      }}>
+    // useLayoutEffect(() => {
+    //   finalTextBoxRef.current?.measureInWindow((tx, ty, tw) => {
+    //     containerRef.current?.measureInWindow((cx, cy, cw) => {
+    //       const endOfTextBox = tx + tw;
+    //       const endOfContainer = cx + cw;
+    //       const distanceTextBoxContainerEnd = endOfContainer - endOfTextBox;
+    //       const finalWidth = cw - distanceTextBoxContainerEnd - 4;
+    //       setStrokeWidth(finalWidth);
+    //     });
+    //   });
+    // }, []);
+
+    return (
       <View
         ref={containerRef}
         className={cn(
@@ -192,7 +192,7 @@ const ExerciseListItem = ({
           )}
         />
         <Text className="text-primary flex-1 font-lexend-bold">
-          0{index + 1}
+          0{/* 0{index + 1} */}
         </Text>
         <Text className="text-white flex-1 font-lexend-bold">{weight}</Text>
         <Text className="text-white flex-1 font-lexend-bold">{reps}</Text>
@@ -211,9 +211,12 @@ const ExerciseListItem = ({
           />
         </View>
       </View>
-    </Swipeable>
-  );
-};
+    );
+  },
+  (prev, next) => true,
+);
+
+ExerciseListItem.displayName = 'ExerciseListItem';
 
 const ExerciseListNewItem = ({
   index,
@@ -229,48 +232,48 @@ const ExerciseListNewItem = ({
   const [rpe, setRpe] = React.useState('');
 
   return (
-    <Swipeable
-      renderRightActions={() => <DeleteAction />}
-      onSwipeableOpen={(direction) => {
-        if (direction === 'right') {
-          onCancel();
-        }
-      }}
-      overshootRight={false}>
-      <View className="flex flex-1 flex-row p-3 items-center bg-neutral-foreground rounded-lg ">
-        <Text className="text-primary w-full flex-1/5 font-lexend-bold">
-          0{index + 1}
-        </Text>
+    // <Swipeable
+    //   renderRightActions={() => <DeleteAction />}
+    //   onSwipeableOpen={(direction) => {
+    //     if (direction === 'right') {
+    //       onCancel();
+    //     }
+    //   }}
+    //   overshootRight={false}>
+    <View className="flex flex-1 flex-row p-3 items-center bg-neutral-foreground rounded-lg ">
+      <Text className="text-primary w-full flex-1/5 font-lexend-bold">
+        0{index + 1}
+      </Text>
 
-        <View className="flex-1/5">
-          <TextInput
-            className="text-white w-8 border border-neutral-border overflow-hidden flex-1/5 font-lexend-bold bg-neutral rounded"
-            keyboardType="numeric"
-            value={weight}
-            onChangeText={setWeight}
-          />
-        </View>
-        <View className="flex-1/5 flex items-start">
-          <TextInput
-            className="text-white w-8 font-lexend-bold bg-neutral border border-neutral-border rounded"
-            keyboardType="numeric"
-            value={reps}
-            onChangeText={setReps}
-          />
-        </View>
-        <View className="flex-1/5 flex items-start">
-          <TextInput
-            className="w-8 border border-neutral-border font-lexend-bold bg-neutral rounded"
-            keyboardType="numeric"
-            value={rpe}
-            onChangeText={setRpe}
-          />
-        </View>
-        <View className="flex-1/5">
-          <Button title="add" />
-        </View>
+      <View className="flex-1/5">
+        <TextInput
+          className="text-white w-8 border border-neutral-border overflow-hidden flex-1/5 font-lexend-bold bg-neutral rounded"
+          keyboardType="numeric"
+          value={weight}
+          onChangeText={setWeight}
+        />
       </View>
-    </Swipeable>
+      <View className="flex-1/5 flex items-start">
+        <TextInput
+          className="text-white w-8 font-lexend-bold bg-neutral border border-neutral-border rounded"
+          keyboardType="numeric"
+          value={reps}
+          onChangeText={setReps}
+        />
+      </View>
+      <View className="flex-1/5 flex items-start">
+        <TextInput
+          className="w-8 border border-neutral-border font-lexend-bold bg-neutral rounded"
+          keyboardType="numeric"
+          value={rpe}
+          onChangeText={setRpe}
+        />
+      </View>
+      <View className="flex-1/5">
+        <Button title="add" />
+      </View>
+    </View>
+    // </Swipeable>
   );
 };
 
@@ -323,13 +326,6 @@ const Checkbox = ({
   );
 };
 
-export {
-  ExerciseList,
-  ExerciseListButton,
-  ExerciseListItem,
-  ExerciseListNewItem
-};
-
 const ExerciseListSortable = ({
   onDragStart,
   onDrop,
@@ -339,23 +335,47 @@ const ExerciseListSortable = ({
   onDrop?: (id: string, position: number) => void;
   items: Set[];
 }) => {
+  useEffect(() => {
+    console.log('exercise list soratble mounted');
+  }, []);
   const renderItem = useCallback(
-    (props: SortableRenderItemProps<Set>) => {
-      const {
-        item,
-        id,
-        positions,
-        index,
-        lowerBound,
-        autoScrollDirection,
-        itemsCount,
-        itemHeight,
-      } = props;
+    ({
+      item,
 
+      id,
+      positions,
+      index,
+      lowerBound,
+      autoScrollDirection,
+      itemsCount,
+      itemHeight,
+      ...props
+    }: SortableRenderItemProps<Set>) => {
+      // console.log('all props', {
+      //   item,
+      //   id,
+      //   positions,
+      //   index,
+      //   lowerBound,
+      //   autoScrollDirection,
+      //   itemsCount,
+      //   itemHeight,
+      // });
+      // const {
+      //   item,
+      //   id,
+      //   positions,
+      //   index,
+      //   lowerBound,
+      //   autoScrollDirection,
+      //   itemsCount,
+      //   itemHeight,
+      // } = props;
+      console.log('count', itemsCount);
       return (
         <SortableItem
-          key={id}
-          id={id}
+          // key={id}
+          id={item.id}
           data={item}
           positions={positions}
           lowerBound={lowerBound}
@@ -366,20 +386,20 @@ const ExerciseListSortable = ({
           onMove={(currentId, from, to) => {
             console.log(`Item ${currentId} moved from ${from} to ${to}`);
           }}
-          onDragStart={(id, position) => {
-            console.log();
-            if (onDragStart) {
-              onDragStart(id, position);
-            }
-          }}
-          onDrop={(id, position) => {
-            if (onDrop) {
-              onDrop(id, position);
-            }
-          }}>
+          // onDragStart={(id, position) => {
+          //   if (onDragStart) {
+          //     onDragStart(id, position);
+          //   }
+          // }}
+          // onDrop={(id, position) => {
+          //   if (onDrop) {
+          //     onDrop(id, position);
+          //   }
+          // }}
+          {...props}>
           <ExerciseListItem
-            id={item.id}
-            index={index}
+            id={id}
+            // index={index}
             rpe={item.rpe}
             weight={item.weight}
             reps={item.reps}
@@ -388,7 +408,7 @@ const ExerciseListSortable = ({
         </SortableItem>
       );
     },
-    [onDragStart, onDrop],
+    [],
   );
 
   return (
@@ -400,3 +420,11 @@ const ExerciseListSortable = ({
     />
   );
 };
+
+export {
+  ExerciseList,
+  ExerciseListButton,
+  ExerciseListItem,
+  ExerciseListNewItem
+};
+
