@@ -1,10 +1,15 @@
 import React, { useCallback, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
-    Sortable,
-    SortableItem,
-    SortableRenderItemProps,
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
+
+import {
+  Sortable,
+  SortableItem,
+  SortableRenderItemProps,
 } from 'react-native-reanimated-dnd';
 
 interface ListItem {
@@ -14,7 +19,13 @@ interface ListItem {
   color: string;
 }
 
-export function SortableListsExample() {
+export function SortableListsExample({
+  onDragStart,
+  onDrop,
+}: {
+  onDragStart?: () => void;
+  onDrop?: () => void;
+}) {
   const [items] = useState<ListItem[]>([
     {
       id: '1',
@@ -48,55 +59,72 @@ export function SortableListsExample() {
     },
   ]);
 
-  const renderItem = useCallback((props: SortableRenderItemProps<ListItem>) => {
-    const {
-      item,
-      id,
-      positions,
-      lowerBound,
-      autoScrollDirection,
-      itemsCount,
-      itemHeight,
-    } = props;
+  const renderItem = useCallback(
+    (props: SortableRenderItemProps<ListItem>) => {
+      const {
+        item,
+        id,
+        positions,
+        lowerBound,
+        autoScrollDirection,
+        itemsCount,
+        itemHeight,
+      } = props;
 
-    return (
-      <SortableItem
-        key={id}
-        id={id}
-        data={item}
-        positions={positions}
-        lowerBound={lowerBound}
-        autoScrollDirection={autoScrollDirection}
-        itemsCount={itemsCount}
-        itemHeight={itemHeight}
-        containerHeight={600} // Adjust based on your container
-        style={styles.sortableItem}
-        onMove={(currentId, from, to) => {
-          console.log(`Item ${currentId} moved from ${from} to ${to}`);
-        }}
-        onDragStart={(currentId, position) => {
-          console.log(
-            `Item ${currentId} started dragging from position ${position}`,
-          );
-        }}
-        onDrop={(currentId, position) => {
-          console.log(`Item ${currentId} dropped at position ${position}`);
-        }}>
-        <View style={[styles.itemContent, { borderLeftColor: item.color }]}>
-          <View style={styles.dragHandle}>
-            <Text style={styles.dragIcon}>⋮⋮</Text>
-          </View>
-          <View style={styles.itemText}>
-            <Text style={styles.itemTitle}>{item.title}</Text>
-            <Text style={styles.itemSubtitle}>{item.subtitle}</Text>
-          </View>
-          <View style={styles.itemIndex}>
-            <Text style={styles.indexText}>{parseInt(id)}</Text>
-          </View>
-        </View>
-      </SortableItem>
-    );
-  }, []);
+      const longPressGesture = Gesture.LongPress().onEnd((e, success) => {
+        if (success) {
+          console.log(`Long pressed for ${e.duration} ms!`);
+        }
+      });
+
+      return (
+        <SortableItem
+          key={id}
+          id={id}
+          data={item}
+          positions={positions}
+          lowerBound={lowerBound}
+          autoScrollDirection={autoScrollDirection}
+          itemsCount={itemsCount}
+          itemHeight={itemHeight}
+          containerHeight={600} // Adjust based on your container
+          style={styles.sortableItem}
+          onMove={(currentId, from, to) => {
+            console.log(`Item ${currentId} moved from ${from} to ${to}`);
+          }}
+          onDragStart={(currentId, position) => {
+            console.log(
+              `Item ${currentId} started dragging from position ${position}`,
+            );
+            if (onDragStart) {
+              onDragStart();
+            }
+          }}
+          onDrop={(currentId, position) => {
+            console.log(`Item ${currentId} dropped at position ${position}`);
+            if (onDrop) {
+              onDrop();
+            }
+          }}>
+          <GestureDetector gesture={longPressGesture}>
+            <View style={[styles.itemContent, { borderLeftColor: item.color }]}>
+              <View style={styles.dragHandle}>
+                <Text style={styles.dragIcon}>⋮⋮</Text>
+              </View>
+              <View style={styles.itemText}>
+                <Text style={styles.itemTitle}>{item.title}</Text>
+                <Text style={styles.itemSubtitle}>{item.subtitle}</Text>
+              </View>
+              <View style={styles.itemIndex}>
+                <Text style={styles.indexText}>{parseInt(id)}</Text>
+              </View>
+            </View>
+          </GestureDetector>
+        </SortableItem>
+      );
+    },
+    [onDragStart, onDrop],
+  );
 
   return (
     <GestureHandlerRootView style={styles.container}>

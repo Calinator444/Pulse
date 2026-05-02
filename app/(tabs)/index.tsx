@@ -30,6 +30,8 @@ export default function HomeScreen() {
     { key: Crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
     { key: Crypto.randomUUID(), rpe: 8, reps: 10, weight: 80, done: false },
   ]);
+
+  const [scrollEnabled, setScrollEnabled] = React.useState(true);
   useEffect(() => {
     const getTodos = async () => {
       let result = await supabase.from('workouts').select('id, sets (rpe) ');
@@ -43,6 +45,7 @@ export default function HomeScreen() {
     <SafeAreaProvider>
       <SafeAreaView className="flex-1 bg-background ">
         <FlatList
+          scrollEnabled={scrollEnabled}
           data={sets}
           renderItem={({ item }) => (
             <ExerciseList
@@ -59,7 +62,10 @@ export default function HomeScreen() {
                   },
                 ]);
               }}>
-              <SortableListsExample />
+              <SortableListsExample
+                onDragStart={() => setScrollEnabled(false)}
+                onDrop={() => setScrollEnabled(true)}
+              />
               {/* <Animated.FlatList
               renderItem={({ item }) => (
                 <Text key={item.key}>{item.weight}</Text>
