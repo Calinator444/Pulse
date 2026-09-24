@@ -415,6 +415,7 @@ const ExerciseListSortable = ({
     <Sortable
       data={items}
       itemKeyExtractor={(item) => item.id}
+      useFlatList={true}
       renderItem={renderItem}
       itemHeight={45}
     />
