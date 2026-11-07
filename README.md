@@ -1,60 +1,50 @@
-# Welcome to your Expo app 👋
+# Pulse
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Pulse is a monorepo containing the mobile app and its future API:
 
-## Get started
+| Project | Location | Stack |
+| --- | --- | --- |
+| Mobile app | Repository root | Expo / React Native |
+| API | `api/` | .NET 10 / ASP.NET Core / Aspire |
 
-1. Install dependencies
+## Mobile app
 
-   ```bash
-   npm install
-   ```
-
-2. Start Supabase
-
-```
-   npx supabase start
-```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Install dependencies and start the Expo development server:
 
 ```bash
-npm run reset-project
+npm ci
+npm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Run the app checks with:
 
-### Troubleshooting
+```bash
+npm run lint
+```
 
-If Supabase fails to start, run `supabase stop` and then `npx supabase start` again.
+The app currently uses Supabase directly for authentication and data access.
+Set `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_KEY` in your local
+environment to run the existing Supabase integration.
 
-## Learn more
+## API
 
-To learn more about developing your project with Expo, look at the following resources:
+The API solution requires the .NET SDK specified in `api/global.json`. From the
+API directory, build and test the solution with:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+cd api
+dotnet build
+dotnet test
+```
 
-## Join the community
+Run the Aspire host and its services with:
 
-Join our community of developers creating universal apps.
+```bash
+dotnet run --project src/AppHost
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Backend transition
+
+The API is now part of this repository, but the mobile app has not yet been
+connected to it. Supabase remains the app's active backend until API endpoints,
+authentication, and the corresponding mobile client integration are implemented.
