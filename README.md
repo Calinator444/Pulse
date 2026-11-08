@@ -43,6 +43,26 @@ Run the Aspire host and its services with:
 dotnet run --project src/AppHost
 ```
 
+### Local HTTPS certificates
+
+The Aspire AppHost dashboard and the API's HTTPS launch profile use the
+ASP.NET Core development certificate. On each developer machine, create and
+trust it with:
+
+```bash
+dotnet dev-certs https --trust
+```
+
+Verify that the certificate is trusted with:
+
+```bash
+dotnet dev-certs https --check --trust
+```
+
+The operating system may ask you to confirm trusting the certificate. The
+AppHost uses `localhost` for its HTTPS launch URL, and Aspire manages the
+service endpoints; no checked-in PFX file or custom local domain is required.
+
 ## Backend transition
 
 The API is now part of this repository, but the mobile app has not yet been
