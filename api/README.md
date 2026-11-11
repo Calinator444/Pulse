@@ -18,11 +18,11 @@ The Aspire dashboard will open automatically, showing the application URLs and l
 
 ## Azure deployment
 
-The `../.github/workflows/api-deploy.yml` workflow tests the API, provisions the
-Azure resources from `infra/main.bicep`, then builds and deploys the API
-container to Azure Container Apps. The deployment includes a private Azure
-Database for PostgreSQL Flexible Server, an Azure Container Registry, and a
-Container Apps environment.
+The `../.github/workflows/api-deploy.yml` workflow builds the API solution,
+runs its unit tests, provisions the Azure resources from `infra/main.bicep`,
+then builds and deploys the API container to Azure Container Apps. The
+deployment includes a private Azure Database for PostgreSQL Flexible Server,
+an Azure Container Registry, and a Container Apps environment.
 
 Configure these repository settings before running the workflow:
 
