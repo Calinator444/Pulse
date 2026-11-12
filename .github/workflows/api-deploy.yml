@@ -22,7 +22,6 @@ jobs:
     timeout-minutes: 45
     env:
       AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-      AZURE_CLIENT_OBJECT_ID: ${{ vars.AZURE_CLIENT_OBJECT_ID }}
     steps:
       - uses: actions/checkout@v4
 
