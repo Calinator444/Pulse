@@ -30,15 +30,15 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Build API solution
+      - name: Build API
         working-directory: api
-        run: dotnet build Pulse.API.slnx --configuration Release
+        run: dotnet build src/Web/Web.csproj --configuration Release
 
       - name: Test API unit projects
         working-directory: api
         run: |
-          dotnet test tests/Domain.UnitTests/Domain.UnitTests.csproj --configuration Release --no-build
-          dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --configuration Release --no-build
+          dotnet test tests/Domain.UnitTests/Domain.UnitTests.csproj --configuration Release
+          dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --configuration Release
 
       - name: Publish API
         run: |
