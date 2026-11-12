@@ -40,6 +40,15 @@ jobs:
           dotnet test tests/Domain.UnitTests/Domain.UnitTests.csproj --configuration Release --no-build
           dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --configuration Release --no-build
 
+      - name: Publish API
+        run: |
+          dotnet publish api/src/Web/Web.csproj \
+            --configuration Release \
+            --no-restore \
+            --output api/artifacts/publish
+          cd api/artifacts/publish
+          zip -q -r ../pulse-api.zip .
+
       - uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -51,49 +60,25 @@ jobs:
         env:
           POSTGRES_ADMIN_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
         run: |
-          az group create --name "$AZURE_RESOURCE_GROUP" --location "${{ vars.AZURE_LOCATION || 'eastus' }}"
           az deployment group create \
             --name pulse-api \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --template-file api/infra/main.bicep \
-            --parameters postgresAdminPassword="$POSTGRES_ADMIN_PASSWORD" \
-              githubActionsPrincipalObjectId="$AZURE_CLIENT_OBJECT_ID"
-          acr_name=$(az deployment group show \
+            --parameters location="${{ vars.AZURE_LOCATION || 'eastus' }}" \
+              postgresAdminPassword="$POSTGRES_ADMIN_PASSWORD"
+          web_app_name=$(az deployment group show \
             --name pulse-api \
             --resource-group "$AZURE_RESOURCE_GROUP" \
-            --query properties.outputs.acrName.value \
+            --query properties.outputs.webAppName.value \
             --output tsv)
-          echo "acr_name=$acr_name" >> "$GITHUB_OUTPUT"
+          echo "web_app_name=$web_app_name" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push API image
+      - name: Deploy API
         env:
-          ACR_NAME: ${{ steps.infrastructure.outputs.acr_name }}
+          WEB_APP_NAME: ${{ steps.infrastructure.outputs.web_app_name }}
         run: |
-          for attempt in {1..12}; do
-            if az acr login --name "$ACR_NAME"; then
-              break
-            fi
-            if [ "$attempt" -eq 12 ]; then
-              echo "Container registry authorization did not become available."
-              exit 1
-            fi
-            sleep 10
-          done
-          image="$ACR_NAME.azurecr.io/pulse-api:$GITHUB_SHA"
-          docker build --file api/Dockerfile --tag "$image" api
-          docker push "$image"
-          echo "image=$image" >> "$GITHUB_OUTPUT"
-        id: image
-
-      - name: Deploy API image
-        env:
-          POSTGRES_ADMIN_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
-          IMAGE: ${{ steps.image.outputs.image }}
-        run: |
-          az deployment group create \
-            --name pulse-api \
+          az webapp deploy \
             --resource-group "$AZURE_RESOURCE_GROUP" \
-            --template-file api/infra/main.bicep \
-            --parameters postgresAdminPassword="$POSTGRES_ADMIN_PASSWORD" \
-              githubActionsPrincipalObjectId="$AZURE_CLIENT_OBJECT_ID" \
-              containerImage="$IMAGE"
+            --name "$WEB_APP_NAME" \
+            --src-path api/artifacts/pulse-api.zip \
+            --type zip

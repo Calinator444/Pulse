@@ -5,24 +5,10 @@ param location string = resourceGroup().location
 @secure()
 param postgresAdminPassword string
 
-@description('Object ID of the GitHub Actions service principal.')
-param githubActionsPrincipalObjectId string
-
-@description('Container image to deploy. Leave empty when provisioning infrastructure only.')
-param containerImage string = ''
-
-var acrName = 'pulse${uniqueString(resourceGroup().id)}'
+var webAppName = 'pulse-api-${uniqueString(resourceGroup().id, subscription().id)}'
 var postgresServerName = 'pulse-pg-${uniqueString(resourceGroup().id)}'
 var postgresDnsZoneName = 'private.postgres.database.azure.com'
 var databaseName = 'Pulse-APIDb'
-var acrPushRoleDefinitionId = subscriptionResourceId(
-  'Microsoft.Authorization/roleDefinitions',
-  '8311e382-0749-4cb8-b61a-304f252e45ec'
-)
-var acrPullRoleDefinitionId = subscriptionResourceId(
-  'Microsoft.Authorization/roleDefinitions',
-  '7f951dda-4ed3-4680-a7ca-43fe172d538d'
-)
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-01-01' = {
   name: 'pulse-api-vnet'
@@ -36,16 +22,16 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-01-01' = {
   }
 }
 
-resource containerAppsSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-01-01' = {
+resource appServiceSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-01-01' = {
   parent: virtualNetwork
-  name: 'container-apps'
+  name: 'app-service'
   properties: {
-    addressPrefix: '10.0.0.0/23'
+    addressPrefix: '10.0.0.0/27'
     delegations: [
       {
-        name: 'container-apps'
+        name: 'app-service'
         properties: {
-          serviceName: 'Microsoft.App/environments'
+          serviceName: 'Microsoft.Web/serverFarms'
         }
       }
     ]
@@ -82,27 +68,6 @@ resource postgresDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLi
     virtualNetwork: {
       id: virtualNetwork.id
     }
-  }
-}
-
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
-  name: acrName
-  location: location
-  sku: {
-    name: 'Basic'
-  }
-  properties: {
-    adminUserEnabled: false
-  }
-}
-
-resource githubActionsAcrPushRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(containerRegistry.id, githubActionsPrincipalObjectId, acrPushRoleDefinitionId)
-  scope: containerRegistry
-  properties: {
-    roleDefinitionId: acrPushRoleDefinitionId
-    principalId: githubActionsPrincipalObjectId
-    principalType: 'ServicePrincipal'
   }
 }
 
@@ -145,72 +110,45 @@ resource database 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2024-08-0
   }
 }
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
-  name: 'pulse-api-logs'
+resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
+  name: 'pulse-api-plan'
   location: location
+  kind: 'linux'
+  sku: {
+    name: 'B1'
+    tier: 'Basic'
+    size: 'B1'
+    capacity: 1
+  }
   properties: {
-    retentionInDays: 30
-    sku: {
-      name: 'PerGB2018'
-    }
+    reserved: true
   }
 }
 
-resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' = {
-  name: 'pulse-api-environment'
+resource webApp 'Microsoft.Web/sites@2023-12-01' = {
+  name: webAppName
   location: location
+  kind: 'app,linux'
   properties: {
-    appLogsConfiguration: {
-      destination: 'log-analytics'
-      logAnalyticsConfiguration: {
-        customerId: logAnalytics.properties.customerId
-        sharedKey: logAnalytics.listKeys().primarySharedKey
-      }
-    }
-    vnetConfiguration: {
-      infrastructureSubnetId: containerAppsSubnet.id
-      internal: false
-    }
-  }
-}
-
-resource registryIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: 'pulse-api-registry'
-  location: location
-}
-
-resource registryAcrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(containerRegistry.id, registryIdentity.id, acrPullRoleDefinitionId)
-  scope: containerRegistry
-  properties: {
-    roleDefinitionId: acrPullRoleDefinitionId
-    principalId: registryIdentity.properties.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-resource api 'Microsoft.App/containerApps@2024-03-01' = if (!empty(containerImage)) {
-  name: 'pulse-api'
-  location: location
-  identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${registryIdentity.id}': {}
-    }
-  }
-  properties: {
-    managedEnvironmentId: containerAppsEnvironment.id
-    configuration: {
-      activeRevisionsMode: 'Single'
-      registries: [
+    serverFarmId: appServicePlan.id
+    httpsOnly: true
+    virtualNetworkSubnetId: appServiceSubnet.id
+    siteConfig: {
+      alwaysOn: true
+      ftpsState: 'Disabled'
+      minTlsVersion: '1.2'
+      linuxFxVersion: 'DOTNETCORE|10.0'
+      appSettings: [
         {
-          server: containerRegistry.properties.loginServer
-          identity: registryIdentity.id
+          name: 'ASPNETCORE_ENVIRONMENT'
+          value: 'Production'
         }
-      ]
-      secrets: [
         {
-          name: 'database-connection'
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '1'
+        }
+        {
+          name: 'ConnectionStrings__Pulse-APIDb'
           value: format(
             'Host={0};Database={1};Username=pulseadmin;Pass{2}{3};SSL Mode=VerifyFull',
             postgresServer.properties.fullyQualifiedDomainName,
@@ -220,45 +158,11 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = if (!empty(containerImag
           )
         }
       ]
-      ingress: {
-        external: true
-        targetPort: 8080
-        transport: 'auto'
-        allowInsecure: false
-      }
-    }
-    template: {
-      containers: [
-        {
-          name: 'pulse-api'
-          image: containerImage
-          env: [
-            {
-              name: 'ASPNETCORE_HTTP_PORTS'
-              value: '8080'
-            }
-            {
-              name: 'ConnectionStrings__Pulse-APIDb'
-              secretRef: 'database-connection'
-            }
-          ]
-          resources: {
-            cpu: json('0.5')
-            memory: '1Gi'
-          }
-        }
-      ]
-      scale: {
-        minReplicas: 1
-        maxReplicas: 3
-      }
     }
   }
   dependsOn: [
     database
-    registryAcrPullRole
   ]
 }
 
-output acrName string = containerRegistry.name
-output containerAppName string = 'pulse-api'
+output webAppName string = webApp.name
