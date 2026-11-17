@@ -45,8 +45,6 @@ jobs:
             --configuration Release \
             --no-restore \
             --output api/artifacts/publish
-          cd api/artifacts/publish
-          zip -q -r ../pulse-api.zip .
 
       - uses: azure/login@v2
         with:
@@ -73,11 +71,7 @@ jobs:
           echo "web_app_name=$web_app_name" >> "$GITHUB_OUTPUT"
 
       - name: Deploy API
-        env:
-          WEB_APP_NAME: ${{ steps.infrastructure.outputs.web_app_name }}
-        run: |
-          az webapp deploy \
-            --resource-group "$AZURE_RESOURCE_GROUP" \
-            --name "$WEB_APP_NAME" \
-            --src-path api/artifacts/pulse-api.zip \
-            --type zip
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ steps.infrastructure.outputs.web_app_name }}
+          package: api/artifacts/publish

@@ -21,7 +21,8 @@ The Aspire dashboard will open automatically, showing the application URLs and l
 The `../.github/workflows/api-deploy.yml` workflow builds the API Web project,
 runs its unit tests, publishes the API with the .NET SDK, provisions the Azure
 resources from `infra/main.bicep`, then deploys a ZIP package to Linux Azure App
-Service. The infrastructure includes a private Azure Database for PostgreSQL
+Service using `azure/webapps-deploy`. The action packages the published folder
+for deployment. The infrastructure includes a private Azure Database for PostgreSQL
 Flexible Server and an App Service Plan with VNet integration.
 
 Configure these repository settings before running the workflow:
