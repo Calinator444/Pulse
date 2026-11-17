@@ -16,6 +16,29 @@ dotnet run --project .\src\AppHost
 
 The Aspire dashboard will open automatically, showing the application URLs and logs.
 
+## Azure deployment
+
+The `../.github/workflows/api-deploy.yml` workflow builds the API Web project,
+runs its unit tests, publishes the API with the .NET SDK, provisions the Azure
+resources from `infra/main.bicep`, then deploys a ZIP package to Linux Azure App
+Service using `azure/webapps-deploy`. The action packages the published folder
+for deployment. The infrastructure includes a private Azure Database for PostgreSQL
+Flexible Server and an App Service Plan with VNet integration.
+
+Configure these repository settings before running the workflow:
+
+- Secrets `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID` for
+  an Azure service principal configured for GitHub Actions OIDC.
+- Secret `POSTGRES_ADMIN_PASSWORD` with a strong alphanumeric password.
+- Variable `AZURE_RESOURCE_GROUP` for an existing resource group.
+- Optionally, variable `AZURE_LOCATION`; it defaults to `eastus`.
+
+The service principal needs Contributor permission on the target resource
+group. Create the resource group before running the workflow. Configure a
+federated credential on the service principal for this repository's `main`
+branch and the GitHub Actions OIDC issuer. PostgreSQL is private to the virtual
+network; Aspire remains the local development orchestrator.
+
 ## Code Styles & Formatting
 
 The template includes [EditorConfig](https://editorconfig.org/) support to help maintain consistent coding styles for multiple developers working on the same project across various editors and IDEs. The **.editorconfig** file defines the coding styles applicable to this solution.
